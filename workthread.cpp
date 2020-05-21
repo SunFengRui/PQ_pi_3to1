@@ -21,7 +21,7 @@ int A_packet_number;
 
 volatile short an_buffer[AN_BUFFER_880kLEN];
 static short an_buffer_cur[AN_BUFFER_880kLEN];
-unsigned long an_buffer_idx_A = 0;
+unsigned long an_buffer_idx = 0;
 static unsigned long an_buffer_8800flag_A = 0;
 static int index_8800_A = 0;
 
@@ -32,8 +32,7 @@ static char A_fre_flag = 0;
 static u_short  A_temp, A_temp_last;
 u_short A_flag;
 static u_char error_flag = 0;
-static u_char A_flag1 = 0, A_flag2 = 0;
-static u_short stand_flag;
+
 
 short output1,output2;
 char output_flag=0;
@@ -45,20 +44,37 @@ static int packet_offset=16;
 #endif
 
 
-//第一个参数是pcap_loop的最后一个参数，当收到足够数量的包后pcap_loop会调用callback回调函数，同时将pcap_loop()的user参数传递给它
-//第二个参数是收到的数据包的pcap_pkthdr类型的指针
-//第三个参数是收到的数据包数据
+int B_packet_number;
+static char B_fre_flag = 0;
+static int index_8800_B = 0;
+static short an_buffer_b[AN_BUFFER_880kLEN];
+static short an_buffer_b_cur[AN_BUFFER_880kLEN];
+static unsigned long an_buffer_8800flag_B = 0;
+
+u_int B_err_flag;
+u_short B_err_current;
+unsigned long B_err_sum;
+
+u_short  B_flag;
+
+
+int C_packet_number;
+static char C_fre_flag = 0;
+static int index_8800_C = 0;
+static short an_buffer_c[AN_BUFFER_880kLEN];
+static short an_buffer_c_cur[AN_BUFFER_880kLEN];
+static unsigned long an_buffer_8800flag_C = 0;
+u_int C_err_flag;
+u_short C_err_current;
+unsigned long C_err_sum;
+
+u_short  C_flag;
+
 void ethernet_protocol_packet_callback_A(u_char * arg, const struct pcap_pkthdr * pkthdr, const u_char * packet)
 {
     an_point *sample;
     (void)(arg);
     sample = (an_point *)(packet + packet_offset);
-    if (!A_flag1)  //ִֻ
-        {
-            A_flag = ntohs(sample->stand_flag);
-            stand_flag = (A_flag - 1) % mod_value;
-            A_flag1 = 1;
-        }
     A_temp = ntohs(sample->stand_flag);
 
     if (A_temp != ((A_temp_last + 1) % mod_value))
@@ -69,241 +85,55 @@ void ethernet_protocol_packet_callback_A(u_char * arg, const struct pcap_pkthdr 
                 A_err_flag++;
             }
     A_temp_last = A_temp;
-    if (A_temp == stand_flag)
-        {
-            A_flag2 = 1;
-        }
-    //if (A_flag2)
     {
-    if (an_buffer_idx_A < AN_BUFFER_880kLEN)
+    if (an_buffer_idx < AN_BUFFER_880kLEN)
     {
-        #if(AD_SAMPLE_ACCURACY==16)
+            an_buffer[an_buffer_idx] = ntohl(sample->A_U)/4;//
+            an_buffer_cur[an_buffer_idx] = ntohl(sample->A_I)/4;//
+            an_buffer[an_buffer_idx]=an_buffer[an_buffer_idx]*a_channel_index;
+            an_buffer_b[an_buffer_idx] = ntohl(sample->B_U) / 4;//
+            an_buffer_b_cur[an_buffer_idx] = ntohl(sample->B_I) / 4;//
+            an_buffer_c[an_buffer_idx] = ntohl(sample->C_U) / 4;//
+            an_buffer_c_cur[an_buffer_idx] = ntohl(sample->C_I) / 4;//
+            an_buffer_idx++;
+             if(output_flag==0)
             {
-            an_buffer[an_buffer_idx_A] = ntohs(sample->an_ch0)*a_channel_index;//
-            an_buffer_cur[an_buffer_idx_A] = ntohs(sample->an_ch1)*a_channel_index;//
-            }
-        #else
-            {
-            an_buffer[an_buffer_idx_A] = ntohl(sample->an_ch0)/4;//
-            an_buffer_cur[an_buffer_idx_A] = ntohl(sample->an_ch0)/4;//
-            an_buffer[an_buffer_idx_A]=an_buffer[an_buffer_idx_A]*a_channel_index;
-            }
-        #endif
-
-        an_buffer_idx_A++;
-        if(output_flag==0)
-            {
-                output1=an_buffer[an_buffer_idx_A-1];
-                //output1=an_buffer[0];
-                //printf("**********%d %d\n",output1,an_buffer[0]);
-                //output2=ntohs(sample->stand_flag);
+                output1=an_buffer[an_buffer_idx-1];
                 output2=A_temp;
                 output_flag=1;
             }
-        if (an_buffer_idx_A % 400 == 0) //400
+        if (an_buffer_idx % 400 == 0) //400
+        {
             sem_post(&A_halfcalc_semaphore);
-        if (an_buffer_idx_A % 8 == 0) //
+            sem_post(&B_halfcalc_semaphore);
+            sem_post(&C_halfcalc_semaphore);
+        }
+        if (an_buffer_idx % 8 == 0) //
+        {
             sem_post(&data_send_sem);
-        if (an_buffer_idx_A % Plus_8000 == 0)//
+        }
+        if (an_buffer_idx % Plus_8000 == 0)//
              {
-               index_8800_A = an_buffer_idx_A / Plus_8000;
+               index_8800_A = an_buffer_idx / Plus_8000;
                an_buffer_8800flag_A = 1;
-               sem_post(&FFT_A_semaphore);
+               sem_post(&FFT_semaphore);
              }
         }
    else
         {
-            an_buffer_idx_A = 0;
-        #if(AD_SAMPLE_ACCURACY==16)
-            {
-            an_buffer[an_buffer_idx_A] = ntohs(sample->an_ch0)*a_channel_index;//
-            an_buffer_cur[an_buffer_idx_A] = ntohs(sample->an_ch1)*a_channel_index;//
-            }
-        #else
-            {
-            an_buffer[an_buffer_idx_A] = ntohl(sample->an_ch0)/4;//
-            an_buffer_cur[an_buffer_idx_A] = ntohl(sample->an_ch0)/4;//
-            }
-        #endif
-            an_buffer_idx_A++;
+            an_buffer_idx = 0;
+            an_buffer[an_buffer_idx] = ntohl(sample->A_U)/4;//
+            an_buffer_cur[an_buffer_idx] = ntohl(sample->A_I)/4;//
+            an_buffer[an_buffer_idx]=an_buffer[an_buffer_idx]*a_channel_index;
+            an_buffer_b[an_buffer_idx] = ntohl(sample->B_U) / 4;//
+            an_buffer_b_cur[an_buffer_idx] = ntohl(sample->B_I) / 4;//
+            an_buffer_c[an_buffer_idx] = ntohl(sample->C_U) / 4;//
+            an_buffer_c_cur[an_buffer_idx] = ntohl(sample->C_I) / 4;//
+            an_buffer_idx++;
         }
      }
     A_packet_number = 1;
 }
-int B_packet_number;
-static char B_fre_flag = 0;
-static int index_8800_B = 0;
-unsigned long an_buffer_idx_B = 0;
-static short an_buffer_b[AN_BUFFER_880kLEN];
-static short an_buffer_b_cur[AN_BUFFER_880kLEN];
-static unsigned long an_buffer_8800flag_B = 0;
-
-u_int B_err_flag;
-u_short B_err_current;
-unsigned long B_err_sum;
-static u_short B_temp,B_temp_last;
-u_short  B_flag;
-static u_char B_flag1 = 0, B_flag2 = 0;
-void ethernet_protocol_packet_callback_B(u_char *user_data,
-    const struct pcap_pkthdr *packet_header,
-    const u_char *packet_content)
-{
-     an_point *sample;
-     (void)(user_data);
-     sample = (an_point *)(packet_content + packet_offset);
-     if (!B_flag1)  //ִֻ
-         {
-             B_flag = ntohs(sample->stand_flag);
-             B_flag1 = 1;
-         }
-     B_temp = ntohs(sample->stand_flag);
-
-     if (B_temp != ((B_temp_last + 1) % mod_value))
-     {
-         error_flag = 1;
-         B_err_current = (((short)(B_temp - B_temp_last - 1)) % mod_value);
-         B_err_sum += B_err_current;
-         B_err_flag++;
-     }
-     B_temp_last = B_temp;
-     if (B_temp == stand_flag)
-         {
-             B_flag2 = 1;
-         }
-         //if (B_flag2)
-         {
-     if (an_buffer_idx_B < AN_BUFFER_880kLEN)   //     880000 1000  20s
-     {
-         //ntohs
-         #if (AD_SAMPLE_ACCURACY == 16)
-         {
-             an_buffer_b[an_buffer_idx_B] = ntohs(sample->an_ch2);//B
-             an_buffer_b_cur[an_buffer_idx_B] = ntohs(sample->an_ch3);//B
-         }
-         #else
-         {
-             an_buffer_b[an_buffer_idx_B] = ntohl(sample->an_ch0) / 4;//
-             an_buffer_b_cur[an_buffer_idx_B] = ntohl(sample->an_ch0) / 4;//
-         }
-         #endif
-         an_buffer_idx_B++;
-         /********************************************�����ڼ���**********************************************************************************/
-         if (an_buffer_idx_B % 400 == 0) //400
-             sem_post(&FFT_B_semaphore);
-
-         if (an_buffer_idx_B % Plus_8000 == 0)//
-         {
-             index_8800_B = an_buffer_idx_B / Plus_8000;
-             an_buffer_8800flag_B = 1;
-             sem_post(&FFT_B_semaphore);
-         }
-     }
-     else
-     {
-         an_buffer_idx_B = 0;
-         #if (AD_SAMPLE_ACCURACY == 16)
-         {
-             an_buffer_b[an_buffer_idx_B] = ntohs(sample->an_ch2);//B��ѹ
-             an_buffer_b_cur[an_buffer_idx_B] = ntohs(sample->an_ch3);//B��ѹ
-         }
-         #else
-         {
-             an_buffer_b[an_buffer_idx_B] = ntohl(sample->an_ch0) / 4;//B��ѹ
-             an_buffer_b_cur[an_buffer_idx_B] = ntohl(sample->an_ch0) / 4;//B��ѹ
-         }
-         #endif
-         an_buffer_idx_B++;
-     }
-          }
-     B_packet_number = 1;
-
-}
-int C_packet_number;
-static char C_fre_flag = 0;
-static int index_8800_C = 0;
-unsigned long an_buffer_idx_C = 0;
-static short an_buffer_c[AN_BUFFER_880kLEN];
-static short an_buffer_c_cur[AN_BUFFER_880kLEN];
-static unsigned long an_buffer_8800flag_C = 0;
-u_int C_err_flag;
-u_short C_err_current;
-unsigned long C_err_sum;
-static u_short C_temp, C_temp_last;
-u_short  C_flag;
-static u_char  C_flag1 = 0, C_flag2 = 0;
-void ethernet_protocol_packet_callback_C(u_char *user_data,
-    const struct pcap_pkthdr *packet_header,
-    const u_char *packet_content)
-{
-       an_point *sample;
-        (void)(user_data);
-        sample = (an_point *)(packet_content + packet_offset);
-        if (!C_flag1)  //ִֻ��һ�εõ���ʼֵ
-            {
-                C_flag = ntohs(sample->stand_flag) - 1;
-                C_flag1 = 1;
-            }
-        C_temp = ntohs(sample->stand_flag);
-        if (C_temp != ((C_temp_last + 1) % mod_value))
-        {
-            error_flag = 1;
-            C_err_current = (((short)(C_temp - C_temp_last - 1)) % mod_value);
-            C_err_sum += C_err_current;
-            C_err_flag++;
-        }
-        C_temp_last = C_temp;
-        if (C_temp == stand_flag)
-            {
-                C_flag2 = 1;
-            }
-            //if (C_flag2)
-            {
-        if (an_buffer_idx_C < AN_BUFFER_880kLEN)   //     880000 1000����   20s
-        {
-            //ntohs�����ǽ�һ��16λ���������ֽ�˳��ת��Ϊ�����ֽ�˳��
-            #if (AD_SAMPLE_ACCURACY == 16)
-            {
-                an_buffer_c[an_buffer_idx_C] = ntohs(sample->an_ch4);//C��ѹ
-                an_buffer_c_cur[an_buffer_idx_C] = ntohs(sample->an_ch5);//C��ѹ
-            }
-            #else
-            {
-                an_buffer_c[an_buffer_idx_C] = ntohl(sample->an_ch0) / 4;//C��ѹ
-                an_buffer_c_cur[an_buffer_idx_C] = ntohl(sample->an_ch0) / 4;//C��ѹ
-            }
-            #endif
-            an_buffer_idx_C++;
-            /********************************************�����ڼ���**********************************************************************************/
-            if (an_buffer_idx_C % 400 == 0) //400(�������)
-                sem_post(&FFT_C_semaphore);
-
-            if (an_buffer_idx_C % Plus_8000 == 0)//
-            {
-                index_8800_C = an_buffer_idx_C / Plus_8000;
-                an_buffer_8800flag_C = 1;
-                sem_post(&FFT_C_semaphore);
-            }
-        }
-        else
-        {
-            an_buffer_idx_C = 0;
-            #if (AD_SAMPLE_ACCURACY == 16)
-            {
-                an_buffer_c[an_buffer_idx_C] = ntohs(sample->an_ch4);//C��ѹ
-                an_buffer_c_cur[an_buffer_idx_C] = ntohs(sample->an_ch5);//C��ѹ
-            }
-            #else
-            {
-                an_buffer_c[an_buffer_idx_C] = ntohl(sample->an_ch0) / 4;//C��ѹ
-                an_buffer_c_cur[an_buffer_idx_C] = ntohl(sample->an_ch0) / 4;//C��ѹ
-            }
-            #endif
-            an_buffer_idx_C++;
-        }
-    }
-            C_packet_number = 1;
-}
-
 double A_rms = 0;//
 double A_cur_rms;//
 double A_active_power;//
@@ -328,6 +158,54 @@ double fftw_phase_differ[AN_BUFFER_LEN_8000];//
 u_long A_FFT = 0;
 static double A_jibophase[100];
 
+
+double B_fre;
+int B_FFT_Number = 0;
+double B_active_power;//A�й�����
+double B_reactive_power;//A�޹�����
+double B_apparent_power = 0;
+double B_active_power_meter = 0;//�й����
+double B_reactive_power_meter = 0;//�޹����
+double B_THDU, B_THDI;
+double fuzhi_b[HarmonicWave] = { 0.0 };
+double fuzhi_b_cur[HarmonicWave] = { 0.0 };
+static int B_HarmonicIndex = 0;
+static double fuzhi_b_temp[HarmonicWaveParam][HarmonicWave] = { 0.0 };
+static double fuzhi_b_ave[HarmonicWave] = { 0.0 };
+static double fuzhi_b_cur_temp[HarmonicWaveParam][HarmonicWave] = { 0.0 };
+static double fuzhi_b_cur_ave[HarmonicWave] = { 0.0 };
+double fftw_phase_differ_b[AN_BUFFER_LEN_8000];//��ѹ������������
+double fftw_phase_b[AN_BUFFER_LEN_8000];
+double fftw_phase_b_cur[HarmonicWave];
+
+double B_rms = 0;
+double B_cur_rms;
+u_long B_FFT = 0;
+static double B_jibophase[100];
+
+double C_fre;
+int C_FFT_Number = 0;
+double C_active_power;//A�й�����
+double C_reactive_power;//A�޹�����
+double C_apparent_power = 0;
+double C_active_power_meter = 0;//�й����
+double C_reactive_power_meter = 0;//�޹����
+double C_THDU, C_THDI;
+double fuzhi_c[HarmonicWave] = { 0.0 };
+double fuzhi_c_cur[HarmonicWave] = { 0.0 };
+static int C_HarmonicIndex = 0;
+static double fuzhi_c_temp[HarmonicWaveParam][HarmonicWave] = { 0.0 };
+static double fuzhi_c_ave[HarmonicWave] = { 0.0 };
+static double fuzhi_c_cur_temp[HarmonicWaveParam][HarmonicWave] = { 0.0 };
+static double fuzhi_c_cur_ave[HarmonicWave] = { 0.0 };
+double fftw_phase_differ_c[AN_BUFFER_LEN_8000];//��ѹ������������
+double fftw_phase_c[AN_BUFFER_LEN_8000];
+double fftw_phase_c_cur[HarmonicWave];
+
+double C_rms = 0;
+double C_cur_rms;
+u_long C_FFT = 0;
+static double C_jibophase[100];
 void *FFT_AThreadFunc(void *arg)
 {
         int i, j;
@@ -335,55 +213,110 @@ void *FFT_AThreadFunc(void *arg)
         double fftw_ampout_fuzhi[PeriodPointMax * 10];
         double fftw_ampout_cur_fuzhi[PeriodPointMax * 10];
         short buffer_8800_a[Plus_8000];
-        short buffer_8800_cur[Plus_8000];
+        short buffer_8800_A_cur[Plus_8000];
 
-        fftw_complex *in, *out;
-        fftw_plan p;
-        fftw_complex *in_fuzhi, *out_fuzhi, *in_ia_fuzhi, *out_ia_fuzhi;
-        fftw_plan p_fuzhi, p_ia_fuzhi;
+        fftw_complex *in_A, *out_A;
+        fftw_plan p_A;
+        fftw_complex *in_A_fuzhi, *out_A_fuzhi, *in_ia_fuzhi, *out_ia_fuzhi;
+        fftw_plan p_A_fuzhi, p_ia_fuzhi;
 
         pthread_mutex_lock(&fft_mutex);
-        in = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * AN_BUFFER_LEN_8000);  //4000
-        out = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * AN_BUFFER_LEN_8000);
-        in_fuzhi = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * PeriodPointMax * 10);  //4000
-        out_fuzhi = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * PeriodPointMax * 10);
+        in_A = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * AN_BUFFER_LEN_8000);  //4000
+        out_A = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * AN_BUFFER_LEN_8000);
+        in_A_fuzhi = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * PeriodPointMax * 10);  //4000
+        out_A_fuzhi = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * PeriodPointMax * 10);
         in_ia_fuzhi = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * PeriodPointMax * 10);
         out_ia_fuzhi = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * PeriodPointMax * 10);
         pthread_mutex_unlock(&fft_mutex);
 
-        double hannn[FFT_8000] = { 0 };
+        double hannn_A[FFT_8000] = { 0 };
         double alpha_a[HarmonicWave] = { 0 };
-        double sum_vol, sum_cur, reactive_power_temp, active_power_temp;
+        double sum_vol_A, sum_cur_A, reactive_power_temp_A, active_power_temp_A;
         double deta_a[HarmonicWave] = { 0 };
-        int index;
-        double THDU_temp = 0;
-        double THDI_temp = 0;
+        int index_A;
+        double THDU_temp_A = 0;
+        double THDI_temp_A = 0;
+
+        double fftw_ampout_b[AN_FFT_LEN_8000];
+        double fftw_ampout_b_fuzhi[PeriodPointMax * 10];
+        double fftw_ampout_bi_fuzhi[PeriodPointMax * 10];
+        short buffer_8800_b[Plus_8000];
+        short buffer_8800_b_cur[Plus_8000];
+
+        fftw_complex *in_fre_b, *out_fre_b;
+        fftw_plan p_fre_b;
+        fftw_complex *in_b_fuzhi, *out_b_fuzhi, *in_bi_fuzhi, *out_bi_fuzhi;
+        fftw_plan p_b_fuzhi, p_bi_fuzhi;
+        pthread_mutex_lock(&fft_mutex);
+        in_fre_b = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * AN_BUFFER_LEN_8000);
+        out_fre_b = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * AN_BUFFER_LEN_8000);
+        in_b_fuzhi = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * PeriodPointMax * 10);
+        out_b_fuzhi = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * PeriodPointMax * 10);
+        in_bi_fuzhi = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * PeriodPointMax * 10);
+        out_bi_fuzhi = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * PeriodPointMax * 10);
+        pthread_mutex_unlock(&fft_mutex);
+
+        double hannn_b[FFT_8000] = { 0 };
+        double alpha_b[HarmonicWave] = { 0 };
+        double deta_b[HarmonicWave] = { 0 };
+        double B_sum_vol, B_sum_cur, B_reactive_power_temp, B_active_power_temp;
+
+        int index_B;
+        double B_THDU_temp = 0;
+        double B_THDI_temp = 0;
+
+        double fftw_ampout_c[AN_FFT_LEN_8000];
+        double fftw_ampout_c_fuzhi[PeriodPointMax * 10];
+        double fftw_ampout_ci_fuzhi[PeriodPointMax * 10];
+        short buffer_8800_c[Plus_8000];
+        short buffer_8800_c_cur[Plus_8000];
+        fftw_complex *in_c_fre, *out_c_fre;
+        fftw_plan p_c_fre;
+        fftw_complex *in_c_fuzhi, *out_c_fuzhi, *in_ci_fuzhi, *out_ci_fuzhi;
+        fftw_plan p_c_fuzhi, p_ci_fuzhi;
+
+        pthread_mutex_lock(&fft_mutex);
+        in_c_fre = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * AN_BUFFER_LEN_8000);  //4000
+        out_c_fre = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * AN_BUFFER_LEN_8000);
+        in_c_fuzhi = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * PeriodPointMax * 10);
+        out_c_fuzhi = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * PeriodPointMax * 10);
+        in_ci_fuzhi = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * PeriodPointMax * 10);
+        out_ci_fuzhi = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * PeriodPointMax * 10);
+        pthread_mutex_unlock(&fft_mutex);
+
+        double hannn_c[FFT_8000] = { 0 };
+        double alpha_c[HarmonicWave] = { 0 };
+        double deta_c[HarmonicWave] = { 0 };
+        double C_sum_vol, C_sum_cur, C_reactive_power_temp, C_active_power_temp;
+        int index_C;
+        double C_THDU_temp = 0;
+        double C_THDI_temp = 0;
         while (1)
         {
-            sem_wait(&FFT_A_semaphore);
+            sem_wait(&FFT_semaphore);
 
             if (an_buffer_8800flag_A == 1)
             {
-                sum_vol = 0; sum_cur = 0; active_power_temp = 0; reactive_power_temp = 0; THDU_temp = 0; THDI_temp = 0;
+                sum_vol_A = 0; sum_cur_A = 0; active_power_temp_A = 0; reactive_power_temp_A = 0; THDU_temp_A = 0; THDI_temp_A = 0;
                 for (int h = 0; h < Plus_8000; h++)
                 {
                     buffer_8800_a[h] = an_buffer[Plus_8000 * (index_8800_A - 1) + h];   //
-                    buffer_8800_cur[h] = an_buffer_cur[Plus_8000 * (index_8800_A - 1) + h];
+                    buffer_8800_A_cur[h] = an_buffer_cur[Plus_8000 * (index_8800_A - 1) + h];
                 }
                 for (i = 0; i < AN_BUFFER_LEN_8000; i++)
                 {
-                    hannn[i] = 0.5 - 0.5 *cos(2 * PI* i / FFT_8000);
-                    in[i][0] = buffer_8800_a[i] * hannn[i];  //
+                    hannn_A[i] = 0.5 - 0.5 *cos(2 * PI* i / FFT_8000);
+                    in_A[i][0] = buffer_8800_a[i] * hannn_A[i];  //
                 }
                 pthread_mutex_lock(&fft_mutex);
-                p = fftw_plan_dft_1d(AN_BUFFER_LEN_8000, in, out, FFTW_FORWARD, FFTW_ESTIMATE);
-                fftw_execute(p);
-                fftw_destroy_plan(p);
+                p_A = fftw_plan_dft_1d(AN_BUFFER_LEN_8000, in_A, out_A, FFTW_FORWARD, FFTW_ESTIMATE);
+                fftw_execute(p_A);
+                fftw_destroy_plan(p_A);
                 pthread_mutex_unlock(&fft_mutex);
 
-                fftw_ampout_a_fre[9] = sqrt(out[9][0] * out[9][0] + out[9][1] * out[9][1]) / (FFT_8000 / 2);
-                fftw_ampout_a_fre[10] = sqrt(out[10][0] * out[10][0] + out[10][1] * out[10][1]) / (FFT_8000 / 2);
-                fftw_ampout_a_fre[11] = sqrt(out[11][0] * out[11][0] + out[11][1] * out[11][1]) / (FFT_8000 / 2);
+                fftw_ampout_a_fre[9] = sqrt(out_A[9][0] * out_A[9][0] + out_A[9][1] * out_A[9][1]) / (FFT_8000 / 2);
+                fftw_ampout_a_fre[10] = sqrt(out_A[10][0] * out_A[10][0] + out_A[10][1] * out_A[10][1]) / (FFT_8000 / 2);
+                fftw_ampout_a_fre[11] = sqrt(out_A[11][0] * out_A[11][0] + out_A[11][1] * out_A[11][1]) / (FFT_8000 / 2);
 
                 /************************************************************Ƶ��**************************************************************************/
                 alpha_a[0] = (fftw_ampout_a_fre[11] - fftw_ampout_a_fre[9]) / fftw_ampout_a_fre[10];
@@ -409,48 +342,48 @@ void *FFT_AThreadFunc(void *arg)
                 A_FFT++;
                 for (i = 0; i < A_FFT_Number; i++)  //800������
                 {
-                    sum_vol += buffer_8800_a[i] / factor_factor * buffer_8800_a[i] / factor_factor;
-                    sum_cur += buffer_8800_cur[i] / factor_factor * buffer_8800_cur[i] / factor_factor;
-                    active_power_temp += buffer_8800_a[i] / factor_factor * buffer_8800_cur[i] / factor_factor;//˲ʱ�й�����         ��ѹ˲ʱֵ*����˲ʱֵ(û�й�һ��)
+                    sum_vol_A += buffer_8800_a[i] / factor_factor * buffer_8800_a[i] / factor_factor;
+                    sum_cur_A += buffer_8800_A_cur[i] / factor_factor * buffer_8800_A_cur[i] / factor_factor;
+                    active_power_temp_A += buffer_8800_a[i] / factor_factor * buffer_8800_A_cur[i] / factor_factor;//˲ʱ�й�����         ��ѹ˲ʱֵ*����˲ʱֵ(û�й�һ��)
                 }
-                A_active_power = active_power_temp / A_FFT_Number  ;//�й�����       ˲ʱ�й����ʵ��ۼ�
+                A_active_power = active_power_temp_A / A_FFT_Number  ;//�й�����       ˲ʱ�й����ʵ��ۼ�
                 A_active_power_meter += A_active_power * 0.2 / 3600 / 1000;//�й����         ��λKW.h
-                A_rms = sqrt((double)(sum_vol / A_FFT_Number));
-                A_cur_rms = sqrt((double)(sum_cur / A_FFT_Number));
+                A_rms = sqrt((double)(sum_vol_A / A_FFT_Number));
+                A_cur_rms = sqrt((double)(sum_cur_A / A_FFT_Number));
                 A_apparent_power = A_rms * A_cur_rms;
     /******************************************��ѹ����  ֱ������+г����ֵ***************************************************/
                 for (i = 0; i < A_FFT_Number; i++)
                 {
-                    in_fuzhi[i][0] = buffer_8800_a[i];
-                    in_ia_fuzhi[i][0] = buffer_8800_cur[i];
+                    in_A_fuzhi[i][0] = buffer_8800_a[i];
+                    in_ia_fuzhi[i][0] = buffer_8800_A_cur[i];
                 }
                 pthread_mutex_lock(&fft_mutex);
-                p_fuzhi = fftw_plan_dft_1d(A_FFT_Number, in_fuzhi, out_fuzhi, FFTW_FORWARD, FFTW_ESTIMATE);
+                p_A_fuzhi = fftw_plan_dft_1d(A_FFT_Number, in_A_fuzhi, out_A_fuzhi, FFTW_FORWARD, FFTW_ESTIMATE);
                 p_ia_fuzhi = fftw_plan_dft_1d(A_FFT_Number, in_ia_fuzhi, out_ia_fuzhi, FFTW_FORWARD, FFTW_ESTIMATE);
-                fftw_execute(p_fuzhi);
+                fftw_execute(p_A_fuzhi);
                 fftw_execute(p_ia_fuzhi);
-                fftw_destroy_plan(p_fuzhi);
+                fftw_destroy_plan(p_A_fuzhi);
                 fftw_destroy_plan(p_ia_fuzhi);
                 pthread_mutex_unlock(&fft_mutex);
                 //fftw_ampout_fuzhi[0] = sqrt(out_fuzhi[0][0] * out_fuzhi[0][0] + out_fuzhi[0][1] * out_fuzhi[0][1]) / (A_FFT_Number);
                 //fftw_ampout_cur_fuzhi[0] = sqrt(out_ia_fuzhi[0][0] * out_ia_fuzhi[0][0] + out_ia_fuzhi[0][1] * out_ia_fuzhi[0][1]) / (A_FFT_Number);
-                fftw_ampout_fuzhi[0] = out_fuzhi[0][0] / A_FFT_Number;
+                fftw_ampout_fuzhi[0] = out_A_fuzhi[0][0] / A_FFT_Number;
                 fftw_ampout_cur_fuzhi[0] = out_ia_fuzhi[0][0] / A_FFT_Number;
                 for (j = 1; j < 420; j++)
                 {
-                    fftw_ampout_fuzhi[j] = sqrt(out_fuzhi[j][0] * out_fuzhi[j][0] + out_fuzhi[j][1] * out_fuzhi[j][1]) / (A_FFT_Number / 2);
+                    fftw_ampout_fuzhi[j] = sqrt(out_A_fuzhi[j][0] * out_A_fuzhi[j][0] + out_A_fuzhi[j][1] * out_A_fuzhi[j][1]) / (A_FFT_Number / 2);
                     fftw_ampout_cur_fuzhi[j] = sqrt(out_ia_fuzhi[j][0] * out_ia_fuzhi[j][0] + out_ia_fuzhi[j][1] * out_ia_fuzhi[j][1]) / (A_FFT_Number / 2);
                 }
                 for (j = 0; j < (HarmonicWave); j++)
                 {
-                    index = j * 10;
+                    index_A = j * 10;
                     //fuzhi_a[j] = fftw_ampout_fuzhi[index] / factor_factor;
-                    fuzhi_a_temp[A_HarmonicIndex][j]= fftw_ampout_fuzhi[index] / factor_factor;
+                    fuzhi_a_temp[A_HarmonicIndex][j]= fftw_ampout_fuzhi[index_A] / factor_factor;
 
-                    fftw_phase_a_vol[j] = atan2(out_fuzhi[index][1], out_fuzhi[index][0]) + PI / 2;
+                    fftw_phase_a_vol[j] = atan2(out_A_fuzhi[index_A][1], out_A_fuzhi[index_A][0]) + PI / 2;
                     //fuzhi_a_cur[j] = fftw_ampout_cur_fuzhi[index] / factor_factor;
-                    fuzhi_a_cur_temp[A_HarmonicIndex][j] = fftw_ampout_cur_fuzhi[index] / factor_factor;
-                    fftw_phase_a_cur[j] = atan2(out_ia_fuzhi[index][1], out_ia_fuzhi[index][0]) + PI / 2;
+                    fuzhi_a_cur_temp[A_HarmonicIndex][j] = fftw_ampout_cur_fuzhi[index_A] / factor_factor;
+                    fftw_phase_a_cur[j] = atan2(out_ia_fuzhi[index_A][1], out_ia_fuzhi[index_A][0]) + PI / 2;
                     /*************************************************A�๦��������*****************************************************************************/
                     if (fabs(fftw_phase_a_vol[j] - fftw_phase_a_cur[j]) > PI)
                     {
@@ -461,7 +394,6 @@ void *FFT_AThreadFunc(void *arg)
                         fftw_phase_differ[j] = fabs(fftw_phase_a_vol[j] - fftw_phase_a_cur[j]);
                     }
                 }
-
                 A_HarmonicIndex++;
                 if (A_HarmonicIndex == HarmonicWaveParam)
                 {
@@ -484,419 +416,307 @@ void *FFT_AThreadFunc(void *arg)
                 A_jibophase[A_FFT% phase_param2] = fftw_phase_a_vol[1];
                 for (j = 2; j < HarmonicWave; j++)
                 {
-                    THDU_temp += fuzhi_a[j] * fuzhi_a[j];
-                    THDI_temp += fuzhi_a_cur[j] * fuzhi_a_cur[j];
+                    THDU_temp_A += fuzhi_a[j] * fuzhi_a[j];
+                    THDI_temp_A += fuzhi_a_cur[j] * fuzhi_a_cur[j];
                 }
-                THDU = sqrt(THDU_temp) / fuzhi_a[1] * 100;
-                reactive_power_temp += fuzhi_a[1] * fuzhi_a_cur[1] * sin(fftw_phase_differ[1]);
-
-                A_reactive_power = reactive_power_temp / 2;
-
+                THDU = sqrt(THDU_temp_A) / fuzhi_a[1] * 100;
+                reactive_power_temp_A += fuzhi_a[1] * fuzhi_a_cur[1] * sin(fftw_phase_differ[1]);
+                A_reactive_power = reactive_power_temp_A / 2;
                 A_reactive_power_meter += A_reactive_power * 0.2 / 3600 / 1000;
                 an_buffer_8800flag_A = 0;
                }
             }
-            sem_post(&FFT_A_semaphore);
-            sem_wait(&FFT_A_semaphore);
-        }
-        fftw_free(in);
-        fftw_free(out);
-        fftw_free(in_fuzhi);
-        fftw_free(in_ia_fuzhi);
-        fftw_free(out_fuzhi);
-        fftw_free(out_ia_fuzhi);
-}
-double B_fre;
-int B_FFT_Number = 0;
-double B_active_power;//A�й�����
-double B_reactive_power;//A�޹�����
-double B_apparent_power = 0;
-double B_active_power_meter = 0;//�й����
-double B_reactive_power_meter = 0;//�޹����
-double B_THDU, B_THDI;
-double fuzhi_b[HarmonicWave] = { 0.0 };
-double fuzhi_b_cur[HarmonicWave] = { 0.0 };
-static int B_HarmonicIndex = 0;
-static double fuzhi_b_temp[HarmonicWaveParam][HarmonicWave] = { 0.0 };
-static double fuzhi_b_ave[HarmonicWave] = { 0.0 };
-static double fuzhi_b_cur_temp[HarmonicWaveParam][HarmonicWave] = { 0.0 };
-static double fuzhi_b_cur_ave[HarmonicWave] = { 0.0 };
-double fftw_phase_differ_b[AN_BUFFER_LEN_8000];//��ѹ������������
-double fftw_phase_b[AN_BUFFER_LEN_8000];
-double fftw_phase_b_cur[HarmonicWave];
 
-double B_rms = 0;
-double B_cur_rms;
-u_long B_FFT = 0;
-static double B_jibophase[100];
-void *FFT_BThreadFunc(void *arg)
-{
-
-        int i, j;
-        double fftw_ampout_b[AN_FFT_LEN_8000];
-        double fftw_ampout_b_fuzhi[PeriodPointMax * 10];
-        double fftw_ampout_bi_fuzhi[PeriodPointMax * 10];
-        short buffer_8800_b[Plus_8000];
-        short buffer_8800_b_cur[Plus_8000];
-
-        fftw_complex *in_fre_b, *out_fre_b;
-        fftw_plan p_fre_b;
-        fftw_complex *in_b_fuzhi, *out_b_fuzhi, *in_bi_fuzhi, *out_bi_fuzhi;
-        fftw_plan p_b_fuzhi, p_bi_fuzhi;
-        pthread_mutex_lock(&fft_mutex);
-        in_fre_b = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * AN_BUFFER_LEN_8000);
-        out_fre_b = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * AN_BUFFER_LEN_8000);
-        in_b_fuzhi = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * PeriodPointMax * 10);
-        out_b_fuzhi = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * PeriodPointMax * 10);
-        in_bi_fuzhi = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * PeriodPointMax * 10);
-        out_bi_fuzhi = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * PeriodPointMax * 10);
-        pthread_mutex_unlock(&fft_mutex);
-
-        double hannn_b[FFT_8000] = { 0 };
-        double alpha_b[HarmonicWave] = { 0 };
-        double deta_b[HarmonicWave] = { 0 };
-        double B_sum_vol, B_sum_cur, B_reactive_power_temp, B_active_power_temp;
-
-        int index;
-        double B_THDU_temp = 0;
-        double B_THDI_temp = 0;
-        while (1)
-        {
-            sem_wait(&FFT_B_semaphore);
-            if (an_buffer_8800flag_B == 1)
-            {
-                B_sum_vol = 0; B_sum_cur = 0; B_active_power_temp = 0; B_reactive_power_temp = 0; B_THDU_temp = 0; B_THDI_temp = 0;
-                for (int h = 0; h < Plus_8000; h++)
-                {
-                    buffer_8800_b[h] = an_buffer_b[Plus_8000 * (index_8800_B - 1) + h];
-                    buffer_8800_b_cur[h] = an_buffer_b_cur[Plus_8000 * (index_8800_B - 1) + h];
-                    in_b_fuzhi[h][0] = buffer_8800_b[h];
-                    in_bi_fuzhi[h][0] = buffer_8800_b_cur[h];
-                }
-                for (i = 0; i < AN_BUFFER_LEN_8000; i++)
-                {
-                    hannn_b[i] = 0.5 - 0.5 *cos(2 * PI* i / FFT_8000);
-                    in_fre_b[i][0] = buffer_8800_b[i] * hannn_b[i];  //��8800���ǰ8000����FFT�Ӻ�����
-                }
-
-                pthread_mutex_lock(&fft_mutex);
-                p_fre_b = fftw_plan_dft_1d(AN_BUFFER_LEN_8000, in_fre_b, out_fre_b, FFTW_FORWARD, FFTW_ESTIMATE);
-                fftw_execute(p_fre_b);
-                fftw_destroy_plan(p_fre_b);
-                pthread_mutex_unlock(&fft_mutex);
-
-
-                fftw_ampout_b[9] = sqrt(out_fre_b[9][0] * out_fre_b[9][0] + out_fre_b[9][1] * out_fre_b[9][1]) / (FFT_8000 / 2);
-                fftw_ampout_b[10] = sqrt(out_fre_b[10][0] * out_fre_b[10][0] + out_fre_b[10][1] * out_fre_b[10][1]) / (FFT_8000 / 2);
-                fftw_ampout_b[11] = sqrt(out_fre_b[11][0] * out_fre_b[11][0] + out_fre_b[11][1] * out_fre_b[11][1]) / (FFT_8000 / 2);
-                //--------------г����������ֵ-------------------
-                //�����߲�ֵ   Ƶ�׷ֱ���5Hz
-                /************************************************************Ƶ��**************************************************************************/
-                alpha_b[0] = (fftw_ampout_b[11] - fftw_ampout_b[9]) / fftw_ampout_b[10];
-                //Ƶ��������ʽ
-                deta_b[0] = 0.6666 * alpha_b[0]
-                    - 0.073 * alpha_b[0] * alpha_b[0] * alpha_b[0]
-                    + 0.0126 * alpha_b[0] * alpha_b[0] * alpha_b[0] * alpha_b[0] * alpha_b[0];
-                //Ƶ��������ʽ
-                //���Ĺ�ʽ11    0.2=1/5=2000��/10000Hz   N/fs  ����Ƶ��40000Hz-25us
-                B_fre = (deta_b[0] + 10) / 0.2;
-                if ((B_fre > 47.5) && (B_fre < 55.0))
-                    B_fre_flag = 1;
-                else
-                    B_fre_flag = 0;
-
-                if (B_fre_flag)
-                {
-                    B_FFT_Number= (int)(double(40000 / B_fre) * 10 + 0.5);
-                    if ((B_FFT_Number % 2) != 0)
-                        B_FFT_Number++;
-                    B_FFT++;
-
-               pthread_mutex_lock(&fft_mutex);
-                p_b_fuzhi = fftw_plan_dft_1d(B_FFT_Number, in_b_fuzhi, out_b_fuzhi, FFTW_FORWARD, FFTW_ESTIMATE);
-                p_bi_fuzhi = fftw_plan_dft_1d(B_FFT_Number, in_bi_fuzhi, out_bi_fuzhi, FFTW_FORWARD, FFTW_ESTIMATE);
-                fftw_execute(p_b_fuzhi);
-                fftw_execute(p_bi_fuzhi);
-                fftw_destroy_plan(p_b_fuzhi);
-                fftw_destroy_plan(p_bi_fuzhi);
-               pthread_mutex_unlock(&fft_mutex);
-
-                /*fftw_ampout_b_fuzhi[0] = sqrt(out_b_fuzhi[0][0] * out_b_fuzhi[0][0] + out_b_fuzhi[0][1] * out_b_fuzhi[0][1]) / (B_FFT_Number);
-                fftw_ampout_bi_fuzhi[0] = sqrt(out_bi_fuzhi[0][0] * out_bi_fuzhi[0][0] + out_bi_fuzhi[0][1] * out_bi_fuzhi[0][1]) / (B_FFT_Number);*/
-                fftw_ampout_b_fuzhi[0] = out_b_fuzhi[0][0] / B_FFT_Number;
-                fftw_ampout_bi_fuzhi[0] = out_bi_fuzhi[0][0] / B_FFT_Number;
-
-                for (j = 1; j < 420; j++)
-                {
-                    fftw_ampout_b_fuzhi[j] = sqrt(out_b_fuzhi[j][0] * out_b_fuzhi[j][0] + out_b_fuzhi[j][1] * out_b_fuzhi[j][1]) / (B_FFT_Number / 2);
-                    fftw_ampout_bi_fuzhi[j] = sqrt(out_bi_fuzhi[j][0] * out_bi_fuzhi[j][0] + out_bi_fuzhi[j][1] * out_bi_fuzhi[j][1]) / (B_FFT_Number / 2);
-                }
-                for (j = 0; j < (HarmonicWave ); j++)       //��ѹ����+г��
-                {
-                    index = j * 10;
-                    //fuzhi_b[j] = fftw_ampout_b_fuzhi[index] / factor_factor;
-                    fuzhi_b_temp[B_HarmonicIndex][j] = fftw_ampout_b_fuzhi[index] / factor_factor;
-                    fftw_phase_b[j] = atan2(out_b_fuzhi[index][1], out_b_fuzhi[index][0]) + PI / 2;
-                    //fuzhi_b_cur[j] = fftw_ampout_bi_fuzhi[index] / factor_factor;
-                    fuzhi_b_cur_temp[B_HarmonicIndex][j] = fftw_ampout_bi_fuzhi[index] / factor_factor;
-                    fftw_phase_b_cur[j] = atan2(out_bi_fuzhi[index][1], out_bi_fuzhi[index][0]) + PI / 2;
-                    /*************************************************A�๦��������*****************************************************************************/
-                    if (fabs(fftw_phase_b[j] - fftw_phase_b_cur[j]) > PI)
-                    {
-                        fftw_phase_differ_b[j] = 2 * PI - fabs(fftw_phase_b[j] - fftw_phase_b_cur[j]);
-                    }
-                    else
-                    {
-                        fftw_phase_differ_b[j] = fabs(fftw_phase_b[j] - fftw_phase_b_cur[j]);
-                    }
-                }
-                //г����ƽ��ֵ
-                B_HarmonicIndex++;
-                if (B_HarmonicIndex == HarmonicWaveParam)
-                {
-                    B_HarmonicIndex = 0;
-                    for (int j = 0; j < HarmonicWave; j++)
-                    {
-                        for (int i = 0; i < HarmonicWaveParam; i++)
+            if (an_buffer_8800flag_A == 1)
                         {
-                            fuzhi_b_ave[j] += fuzhi_b_temp[i][j];
-                            fuzhi_b_cur_ave[j] += fuzhi_b_cur_temp[i][j];
+                            B_sum_vol = 0; B_sum_cur = 0; B_active_power_temp = 0; B_reactive_power_temp = 0; B_THDU_temp = 0; B_THDI_temp = 0;
+                            for (int h = 0; h < Plus_8000; h++)
+                            {
+                                buffer_8800_b[h] = an_buffer_b[Plus_8000 * (index_8800_B - 1) + h];
+                                buffer_8800_b_cur[h] = an_buffer_b_cur[Plus_8000 * (index_8800_B - 1) + h];
+                                in_b_fuzhi[h][0] = buffer_8800_b[h];
+                                in_bi_fuzhi[h][0] = buffer_8800_b_cur[h];
+                            }
+                            for (i = 0; i < AN_BUFFER_LEN_8000; i++)
+                            {
+                                hannn_b[i] = 0.5 - 0.5 *cos(2 * PI* i / FFT_8000);
+                                in_fre_b[i][0] = buffer_8800_b[i] * hannn_b[i];  //��8800���ǰ8000����FFT�Ӻ�����
+                            }
+
+                            pthread_mutex_lock(&fft_mutex);
+                            p_fre_b = fftw_plan_dft_1d(AN_BUFFER_LEN_8000, in_fre_b, out_fre_b, FFTW_FORWARD, FFTW_ESTIMATE);
+                            fftw_execute(p_fre_b);
+                            fftw_destroy_plan(p_fre_b);
+                            pthread_mutex_unlock(&fft_mutex);
+
+
+                            fftw_ampout_b[9] = sqrt(out_fre_b[9][0] * out_fre_b[9][0] + out_fre_b[9][1] * out_fre_b[9][1]) / (FFT_8000 / 2);
+                            fftw_ampout_b[10] = sqrt(out_fre_b[10][0] * out_fre_b[10][0] + out_fre_b[10][1] * out_fre_b[10][1]) / (FFT_8000 / 2);
+                            fftw_ampout_b[11] = sqrt(out_fre_b[11][0] * out_fre_b[11][0] + out_fre_b[11][1] * out_fre_b[11][1]) / (FFT_8000 / 2);
+                            //--------------г����������ֵ-------------------
+                            //�����߲�ֵ   Ƶ�׷ֱ���5Hz
+                            /************************************************************Ƶ��**************************************************************************/
+                            alpha_b[0] = (fftw_ampout_b[11] - fftw_ampout_b[9]) / fftw_ampout_b[10];
+                            //Ƶ��������ʽ
+                            deta_b[0] = 0.6666 * alpha_b[0]
+                                - 0.073 * alpha_b[0] * alpha_b[0] * alpha_b[0]
+                                + 0.0126 * alpha_b[0] * alpha_b[0] * alpha_b[0] * alpha_b[0] * alpha_b[0];
+                            //Ƶ��������ʽ
+                            //���Ĺ�ʽ11    0.2=1/5=2000��/10000Hz   N/fs  ����Ƶ��40000Hz-25us
+                            B_fre = (deta_b[0] + 10) / 0.2;
+                            if ((B_fre > 47.5) && (B_fre < 55.0))
+                                B_fre_flag = 1;
+                            else
+                                B_fre_flag = 0;
+
+                            if (B_fre_flag)
+                            {
+                                B_FFT_Number= (int)(double(40000 / B_fre) * 10 + 0.5);
+                                if ((B_FFT_Number % 2) != 0)
+                                    B_FFT_Number++;
+                                B_FFT++;
+
+                           pthread_mutex_lock(&fft_mutex);
+                            p_b_fuzhi = fftw_plan_dft_1d(B_FFT_Number, in_b_fuzhi, out_b_fuzhi, FFTW_FORWARD, FFTW_ESTIMATE);
+                            p_bi_fuzhi = fftw_plan_dft_1d(B_FFT_Number, in_bi_fuzhi, out_bi_fuzhi, FFTW_FORWARD, FFTW_ESTIMATE);
+                            fftw_execute(p_b_fuzhi);
+                            fftw_execute(p_bi_fuzhi);
+                            fftw_destroy_plan(p_b_fuzhi);
+                            fftw_destroy_plan(p_bi_fuzhi);
+                           pthread_mutex_unlock(&fft_mutex);
+
+                            /*fftw_ampout_b_fuzhi[0] = sqrt(out_b_fuzhi[0][0] * out_b_fuzhi[0][0] + out_b_fuzhi[0][1] * out_b_fuzhi[0][1]) / (B_FFT_Number);
+                            fftw_ampout_bi_fuzhi[0] = sqrt(out_bi_fuzhi[0][0] * out_bi_fuzhi[0][0] + out_bi_fuzhi[0][1] * out_bi_fuzhi[0][1]) / (B_FFT_Number);*/
+                            fftw_ampout_b_fuzhi[0] = out_b_fuzhi[0][0] / B_FFT_Number;
+                            fftw_ampout_bi_fuzhi[0] = out_bi_fuzhi[0][0] / B_FFT_Number;
+
+                            for (j = 1; j < 420; j++)
+                            {
+                                fftw_ampout_b_fuzhi[j] = sqrt(out_b_fuzhi[j][0] * out_b_fuzhi[j][0] + out_b_fuzhi[j][1] * out_b_fuzhi[j][1]) / (B_FFT_Number / 2);
+                                fftw_ampout_bi_fuzhi[j] = sqrt(out_bi_fuzhi[j][0] * out_bi_fuzhi[j][0] + out_bi_fuzhi[j][1] * out_bi_fuzhi[j][1]) / (B_FFT_Number / 2);
+                            }
+                            for (j = 0; j < (HarmonicWave ); j++)       //��ѹ����+г��
+                            {
+                                index_B = j * 10;
+                                //fuzhi_b[j] = fftw_ampout_b_fuzhi[index] / factor_factor;
+                                fuzhi_b_temp[B_HarmonicIndex][j] = fftw_ampout_b_fuzhi[index_B] / factor_factor;
+                                fftw_phase_b[j] = atan2(out_b_fuzhi[index_B][1], out_b_fuzhi[index_B][0]) + PI / 2;
+                                //fuzhi_b_cur[j] = fftw_ampout_bi_fuzhi[index] / factor_factor;
+                                fuzhi_b_cur_temp[B_HarmonicIndex][j] = fftw_ampout_bi_fuzhi[index_B] / factor_factor;
+                                fftw_phase_b_cur[j] = atan2(out_bi_fuzhi[index_B][1], out_bi_fuzhi[index_B][0]) + PI / 2;
+                                /*************************************************A�๦��������*****************************************************************************/
+                                if (fabs(fftw_phase_b[j] - fftw_phase_b_cur[j]) > PI)
+                                {
+                                    fftw_phase_differ_b[j] = 2 * PI - fabs(fftw_phase_b[j] - fftw_phase_b_cur[j]);
+                                }
+                                else
+                                {
+                                    fftw_phase_differ_b[j] = fabs(fftw_phase_b[j] - fftw_phase_b_cur[j]);
+                                }
+                            }
+                            //г����ƽ��ֵ
+                            B_HarmonicIndex++;
+                            if (B_HarmonicIndex == HarmonicWaveParam)
+                            {
+                                B_HarmonicIndex = 0;
+                                for (int j = 0; j < HarmonicWave; j++)
+                                {
+                                    for (int i = 0; i < HarmonicWaveParam; i++)
+                                    {
+                                        fuzhi_b_ave[j] += fuzhi_b_temp[i][j];
+                                        fuzhi_b_cur_ave[j] += fuzhi_b_cur_temp[i][j];
+                                    }
+                                    fuzhi_b_ave[j] = fuzhi_b_ave[j] / HarmonicWaveParam;
+                                    fuzhi_b[j] = fuzhi_b_ave[j];    //���ս��
+                                    fuzhi_b_ave[j] = 0;
+
+                                    fuzhi_b_cur_ave[j] = fuzhi_b_cur_ave[j] / HarmonicWaveParam;
+                                    fuzhi_b_cur[j] = fuzhi_b_cur_ave[j];    //���ս��
+                                    fuzhi_b_cur_ave[j] = 0;
+                                }
+                            }
+
+                            B_jibophase[B_FFT% phase_param2] = fftw_phase_b[1];
+                            for (i = 0; i < B_FFT_Number; i++)  //800������
+                            {
+                                B_sum_vol += buffer_8800_b[i] / factor_factor * buffer_8800_b[i] / factor_factor;
+                                B_sum_cur += buffer_8800_b_cur[i] / factor_factor * buffer_8800_b_cur[i] / factor_factor;
+                                B_active_power_temp += buffer_8800_b[i] / factor_factor * buffer_8800_b_cur[i] / factor_factor;//˲ʱ�й�����
+                            }
+                            B_active_power = B_active_power_temp / B_FFT_Number;//�й�����       ˲ʱ�й����ʵ��ۼ�
+                            B_active_power_meter += B_active_power * 0.2 / 3600 / 1000;//�й����         ��λKW.h
+                            B_rms = sqrt((double)(B_sum_vol / B_FFT_Number));   //��ѹ��Чֵ     ������
+                            B_cur_rms = sqrt((double)(B_sum_cur / B_FFT_Number));   //������Чֵ      ������
+                            B_apparent_power = B_rms * B_cur_rms;//���ڹ���          ��ѹ��Чֵ*������Чֵ
+
+                            for (j = 2; j < HarmonicWave; j++)
+                            {
+                                B_THDU_temp += fuzhi_b[j] * fuzhi_b[j];
+                                B_THDI_temp += fuzhi_b_cur[j] * fuzhi_b_cur[j];
+                            }
+                            B_THDU = sqrt(B_THDU_temp) / fuzhi_b[1] * 100;
+                            B_reactive_power_temp += fuzhi_b[1] * fuzhi_b_cur[1] * sin(fftw_phase_differ_b[1]);//����ϵ��
+                            //�޹�����
+                            B_reactive_power = B_reactive_power_temp / 2;
+                            //�޹����
+                            B_reactive_power_meter += B_reactive_power * 0.2 / 3600 / 1000;
+                            an_buffer_8800flag_B = 0;
+                            }
                         }
-                        fuzhi_b_ave[j] = fuzhi_b_ave[j] / HarmonicWaveParam;
-                        fuzhi_b[j] = fuzhi_b_ave[j];    //���ս��
-                        fuzhi_b_ave[j] = 0;
 
-                        fuzhi_b_cur_ave[j] = fuzhi_b_cur_ave[j] / HarmonicWaveParam;
-                        fuzhi_b_cur[j] = fuzhi_b_cur_ave[j];    //���ս��
-                        fuzhi_b_cur_ave[j] = 0;
-                    }
-                }
+            if (an_buffer_8800flag_A == 1)
+                        {
+                            C_sum_vol = 0; C_sum_cur = 0; C_reactive_power_temp = 0; C_active_power_temp = 0; C_THDU_temp = 0; C_THDI_temp = 0;
+                            for (int h = 0; h < Plus_8000; h++)
+                            {
+                                buffer_8800_c[h] = an_buffer_c[Plus_8000 * (index_8800_C - 1) + h];
+                                buffer_8800_c_cur[h] = an_buffer_c_cur[Plus_8000 * (index_8800_C - 1) + h];
+                                in_c_fuzhi[h][0] = buffer_8800_c[h];
+                                in_ci_fuzhi[h][0] = buffer_8800_c_cur[h];
+                            }
+                            for (i = 0; i < AN_BUFFER_LEN_8000; i++)
+                            {
+                                hannn_c[i] = 0.5 - 0.5 *cos(2 * PI* i / FFT_8000);
+                                in_c_fre[i][0] = buffer_8800_c[i] * hannn_c[i];  //��8800���ǰ8000����FFT�Ӻ�����
+                            }
 
-                B_jibophase[B_FFT% phase_param2] = fftw_phase_b[1];
-                for (i = 0; i < B_FFT_Number; i++)  //800������
-                {
-                    B_sum_vol += buffer_8800_b[i] / factor_factor * buffer_8800_b[i] / factor_factor;
-                    B_sum_cur += buffer_8800_b_cur[i] / factor_factor * buffer_8800_b_cur[i] / factor_factor;
-                    B_active_power_temp += buffer_8800_b[i] / factor_factor * buffer_8800_b_cur[i] / factor_factor;//˲ʱ�й�����
-                }
-                B_active_power = B_active_power_temp / B_FFT_Number;//�й�����       ˲ʱ�й����ʵ��ۼ�
-                B_active_power_meter += B_active_power * 0.2 / 3600 / 1000;//�й����         ��λKW.h
-                B_rms = sqrt((double)(B_sum_vol / B_FFT_Number));   //��ѹ��Чֵ     ������
-                B_cur_rms = sqrt((double)(B_sum_cur / B_FFT_Number));   //������Чֵ      ������
-                B_apparent_power = B_rms * B_cur_rms;//���ڹ���          ��ѹ��Чֵ*������Чֵ
+                            pthread_mutex_lock(&fft_mutex);
+                            p_c_fre = fftw_plan_dft_1d(AN_BUFFER_LEN_8000, in_c_fre, out_c_fre, FFTW_FORWARD, FFTW_ESTIMATE);
+                            fftw_execute(p_c_fre);
+                            fftw_destroy_plan(p_c_fre);
+                            pthread_mutex_unlock(&fft_mutex);
 
-                for (j = 2; j < HarmonicWave; j++)
-                {
-                    B_THDU_temp += fuzhi_b[j] * fuzhi_b[j];
-                    B_THDI_temp += fuzhi_b_cur[j] * fuzhi_b_cur[j];
-                }
-                B_THDU = sqrt(B_THDU_temp) / fuzhi_b[1] * 100;
-                B_reactive_power_temp += fuzhi_b[1] * fuzhi_b_cur[1] * sin(fftw_phase_differ_b[1]);//����ϵ��
-                //�޹�����
-                B_reactive_power = B_reactive_power_temp / 2;
-                //�޹����
-                B_reactive_power_meter += B_reactive_power * 0.2 / 3600 / 1000;
-                an_buffer_8800flag_B = 0;
-                }
-            }
-            sem_post(&FFT_B_semaphore);
-            sem_wait(&FFT_B_semaphore);
+                            fftw_ampout_c[9] = sqrt(out_c_fre[9][0] * out_c_fre[9][0] + out_c_fre[9][1] * out_c_fre[9][1]) / (FFT_8000 / 2);
+                            fftw_ampout_c[10] = sqrt(out_c_fre[10][0] * out_c_fre[10][0] + out_c_fre[10][1] * out_c_fre[10][1]) / (FFT_8000 / 2);
+                            fftw_ampout_c[11] = sqrt(out_c_fre[11][0] * out_c_fre[11][0] + out_c_fre[11][1] * out_c_fre[11][1]) / (FFT_8000 / 2);
+                            //--------------г����������ֵ-------------------
+                            //�����߲�ֵ   Ƶ�׷ֱ���5Hz
+                            /************************************************************Ƶ��**************************************************************************/
+                            alpha_c[0] = (fftw_ampout_c[11] - fftw_ampout_c[9]) / fftw_ampout_c[10];
+                            //Ƶ��������ʽ
+                            deta_c[0] = 0.6666 * alpha_c[0]
+                                - 0.073 * alpha_c[0] * alpha_c[0] * alpha_c[0]
+                                + 0.0126 * alpha_c[0] * alpha_c[0] * alpha_c[0] * alpha_c[0] * alpha_c[0];
+                            //Ƶ��������ʽ
+                            //���Ĺ�ʽ11    0.2=1/5=2000��/10000Hz   N/fs  ����Ƶ��40000Hz-25us
+                            C_fre = (deta_c[0] + 10) / 0.2;
+                            if ((C_fre > 47.5) && (C_fre < 55.0))
+                                C_fre_flag = 1;
+                            else
+                                C_fre_flag = 0;
+
+                            if (C_fre_flag)
+                            {
+                                pointfre = (int)(40000 / C_fre + 0.5);
+                                C_FFT_Number = (int)(double(40000 / C_fre) * 10 + 0.5);
+                                if ((C_FFT_Number % 2) != 0)
+                                    C_FFT_Number++;
+                                C_FFT++;
+
+                                pthread_mutex_lock(&fft_mutex);
+                                p_c_fuzhi = fftw_plan_dft_1d(C_FFT_Number, in_c_fuzhi, out_c_fuzhi, FFTW_FORWARD, FFTW_ESTIMATE);
+                                p_ci_fuzhi = fftw_plan_dft_1d(C_FFT_Number, in_ci_fuzhi, out_ci_fuzhi, FFTW_FORWARD, FFTW_ESTIMATE);
+                                fftw_execute(p_c_fuzhi);
+                                fftw_execute(p_ci_fuzhi);
+                                fftw_destroy_plan(p_c_fuzhi);
+                                fftw_destroy_plan(p_ci_fuzhi);
+                                pthread_mutex_unlock(&fft_mutex);
+
+                                /*fftw_ampout_c_fuzhi[0] = sqrt(out_c_fuzhi[0][0] * out_c_fuzhi[0][0] + out_c_fuzhi[0][1] * out_c_fuzhi[0][1]) / (C_FFT_Number);
+                                fftw_ampout_ci_fuzhi[0] = sqrt(out_ci_fuzhi[0][0] * out_ci_fuzhi[0][0] + out_ci_fuzhi[0][1] * out_ci_fuzhi[0][1]) / (C_FFT_Number);*/
+                                fftw_ampout_c_fuzhi[0] = out_c_fuzhi[0][0] / C_FFT_Number;
+                                fftw_ampout_ci_fuzhi[0] = out_ci_fuzhi[0][0] / C_FFT_Number;
+                                for (j = 1; j < 420; j++)
+                                {
+                                    fftw_ampout_c_fuzhi[j] = sqrt(out_c_fuzhi[j][0] * out_c_fuzhi[j][0] + out_c_fuzhi[j][1] * out_c_fuzhi[j][1]) / (C_FFT_Number / 2);
+                                    fftw_ampout_ci_fuzhi[j] = sqrt(out_ci_fuzhi[j][0] * out_ci_fuzhi[j][0] + out_ci_fuzhi[j][1] * out_ci_fuzhi[j][1]) / (C_FFT_Number / 2);
+                                }
+                                for (j = 0; j < (HarmonicWave); j++)       //A���ѹ��������+г��   BC���ѹ����+г��
+                                {
+                                    index_C = j * 10;
+                                    //fuzhi_c[j] = fftw_ampout_c_fuzhi[index] / factor_factor;
+                                    fuzhi_c_temp[C_HarmonicIndex][j] = fftw_ampout_c_fuzhi[index_C] / factor_factor;
+                                    fftw_phase_c[j] = atan2(out_c_fuzhi[index_C][1], out_c_fuzhi[index_C][0]) + PI / 2;
+                                    //fuzhi_c_cur[j] = fftw_ampout_ci_fuzhi[index] / factor_factor;
+                                    fuzhi_c_cur_temp[C_HarmonicIndex][j] = fftw_ampout_ci_fuzhi[index_C] / factor_factor;
+                                    fftw_phase_c_cur[j] = atan2(out_ci_fuzhi[index_C][1], out_ci_fuzhi[index_C][0]) + PI / 2;
+                                    if (fabs(fftw_phase_c[j] - fftw_phase_c_cur[j]) > PI)
+                                    {
+                                        fftw_phase_differ_c[j] = 2 * PI - fabs(fftw_phase_c[j] - fftw_phase_c_cur[j]);
+                                    }
+                                    else
+                                    {
+                                        fftw_phase_differ_c[j] = fabs(fftw_phase_c[j] - fftw_phase_c_cur[j]);
+                                    }
+                                }
+                                //г����ƽ��ֵ
+                                C_HarmonicIndex++;
+                                if (C_HarmonicIndex == HarmonicWaveParam)
+                                {
+                                    C_HarmonicIndex = 0;
+                                    for (int j = 0; j < HarmonicWave; j++)
+                                    {
+                                        for (int i = 0; i < HarmonicWaveParam; i++)
+                                        {
+                                            fuzhi_c_ave[j] += fuzhi_c_temp[i][j];
+                                            fuzhi_c_cur_ave[j] += fuzhi_c_cur_temp[i][j];
+                                        }
+                                        fuzhi_c_ave[j] = fuzhi_c_ave[j] / HarmonicWaveParam;
+                                        fuzhi_c[j] = fuzhi_c_ave[j];    //���ս��
+                                        fuzhi_c_ave[j] = 0;
+                                        fuzhi_c_cur_ave[j] = fuzhi_c_cur_ave[j] / HarmonicWaveParam;
+                                        fuzhi_c_cur[j] = fuzhi_c_cur_ave[j];    //���ս��
+                                        fuzhi_c_cur_ave[j] = 0;
+                                    }
+                                }
+                                C_jibophase[C_FFT%phase_param2] = fftw_phase_c[1];
+                                for (i = 0; i < C_FFT_Number; i++)  //800������
+                                {
+                                    C_sum_vol += buffer_8800_c[i] / factor_factor * buffer_8800_c[i] / factor_factor;
+                                    C_sum_cur += buffer_8800_c_cur[i] / factor_factor * buffer_8800_c_cur[i] / factor_factor;
+                                    C_active_power_temp += buffer_8800_c[i] / factor_factor * buffer_8800_c_cur[i] / factor_factor;
+                                }
+
+                                C_active_power = C_active_power_temp / C_FFT_Number;//�й�����       ˲ʱ�й����ʵ��ۼ�
+                                C_active_power_meter += C_active_power * 0.2 / 3600 / 1000;//�й����         ��λKW.h
+                                C_rms = sqrt((double)(C_sum_vol / C_FFT_Number));   //��ѹ��Чֵ     ������
+                                C_cur_rms = sqrt((double)(C_sum_cur / C_FFT_Number));   //������Чֵ      ������
+                                C_apparent_power = C_rms * C_cur_rms;//���ڹ���          ��ѹ��Чֵ*������Чֵ
+                                for (j = 2; j < HarmonicWave; j++)
+                                {
+                                    C_THDU_temp += fuzhi_c[j] * fuzhi_c[j];
+                                    C_THDI_temp += fuzhi_c_cur[j] * fuzhi_c_cur[j];
+                                }
+                                C_THDU = sqrt(C_THDU_temp) / fuzhi_c[1] * 100;
+                                //---------------------------------------------------
+                                C_reactive_power_temp += fuzhi_c[1] * fuzhi_c_cur[1] * sin(fftw_phase_differ_c[1]);//����ϵ��
+                                //�޹�����
+                                C_reactive_power = C_reactive_power_temp / 2;
+                                //�޹����
+                                C_reactive_power_meter += C_reactive_power * 0.2 / 3600 / 1000;
+                                an_buffer_8800flag_C = 0;
+                            }
+                        }
+            sem_post(&FFT_semaphore);
+            sem_wait(&FFT_semaphore);
         }
+
+        fftw_free(in_A);
+        fftw_free(out_A);
+        fftw_free(in_A_fuzhi);
+        fftw_free(in_ia_fuzhi);
+        fftw_free(out_A_fuzhi);
+        fftw_free(out_ia_fuzhi);
+
+        fftw_free(in_fre_b);
+        fftw_free(out_fre_b);
         fftw_free(in_b_fuzhi);
         fftw_free(out_b_fuzhi);
-}
-double C_fre;
-int C_FFT_Number = 0;
-double C_active_power;//A�й�����
-double C_reactive_power;//A�޹�����
-double C_apparent_power = 0;
-double C_active_power_meter = 0;//�й����
-double C_reactive_power_meter = 0;//�޹����
-double C_THDU, C_THDI;
-double fuzhi_c[HarmonicWave] = { 0.0 };
-double fuzhi_c_cur[HarmonicWave] = { 0.0 };
-static int C_HarmonicIndex = 0;
-static double fuzhi_c_temp[HarmonicWaveParam][HarmonicWave] = { 0.0 };
-static double fuzhi_c_ave[HarmonicWave] = { 0.0 };
-static double fuzhi_c_cur_temp[HarmonicWaveParam][HarmonicWave] = { 0.0 };
-static double fuzhi_c_cur_ave[HarmonicWave] = { 0.0 };
-double fftw_phase_differ_c[AN_BUFFER_LEN_8000];//��ѹ������������
-double fftw_phase_c[AN_BUFFER_LEN_8000];
-double fftw_phase_c_cur[HarmonicWave];
+        fftw_free(in_bi_fuzhi);
+        fftw_free(out_bi_fuzhi);
 
-double C_rms = 0;
-double C_cur_rms;
-u_long C_FFT = 0;
-static double C_jibophase[100];
-void *FFT_CThreadFunc(void *arg)
-{
-        int i, j;
-        double fftw_ampout_c[AN_FFT_LEN_8000];
-        double fftw_ampout_c_fuzhi[PeriodPointMax * 10];
-        double fftw_ampout_ci_fuzhi[PeriodPointMax * 10];
-        short buffer_8800_c[Plus_8000];
-        short buffer_8800_c_cur[Plus_8000];
-        fftw_complex *in_c_fre, *out_c_fre;
-        fftw_plan p_c_fre;
-        fftw_complex *in_c_fuzhi, *out_c_fuzhi, *in_ci_fuzhi, *out_ci_fuzhi;
-        fftw_plan p_c_fuzhi, p_ci_fuzhi;
-
-        pthread_mutex_lock(&fft_mutex);
-        in_c_fre = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * AN_BUFFER_LEN_8000);  //4000
-        out_c_fre = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * AN_BUFFER_LEN_8000);
-        in_c_fuzhi = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * PeriodPointMax * 10);
-        out_c_fuzhi = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * PeriodPointMax * 10);
-        in_ci_fuzhi = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * PeriodPointMax * 10);
-        out_ci_fuzhi = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * PeriodPointMax * 10);
-        pthread_mutex_unlock(&fft_mutex);
-
-        double hannn_c[FFT_8000] = { 0 };
-        double alpha_c[HarmonicWave] = { 0 };
-        double deta_c[HarmonicWave] = { 0 };
-        double C_sum_vol, C_sum_cur, C_reactive_power_temp, C_active_power_temp;
-        int index;
-        double C_THDU_temp = 0;
-        double C_THDI_temp = 0;
-        while (1)
-        {
-            sem_wait(&FFT_C_semaphore);
-            if (an_buffer_8800flag_C == 1)
-            {
-                C_sum_vol = 0; C_sum_cur = 0; C_reactive_power_temp = 0; C_active_power_temp = 0; C_THDU_temp = 0; C_THDI_temp = 0;
-                for (int h = 0; h < Plus_8000; h++)
-                {
-                    buffer_8800_c[h] = an_buffer_c[Plus_8000 * (index_8800_C - 1) + h];
-                    buffer_8800_c_cur[h] = an_buffer_c_cur[Plus_8000 * (index_8800_C - 1) + h];
-                    in_c_fuzhi[h][0] = buffer_8800_c[h];
-                    in_ci_fuzhi[h][0] = buffer_8800_c_cur[h];
-                }
-                for (i = 0; i < AN_BUFFER_LEN_8000; i++)
-                {
-                    hannn_c[i] = 0.5 - 0.5 *cos(2 * PI* i / FFT_8000);
-                    in_c_fre[i][0] = buffer_8800_c[i] * hannn_c[i];  //��8800���ǰ8000����FFT�Ӻ�����
-                }
-
-                pthread_mutex_lock(&fft_mutex);
-                p_c_fre = fftw_plan_dft_1d(AN_BUFFER_LEN_8000, in_c_fre, out_c_fre, FFTW_FORWARD, FFTW_ESTIMATE);
-                fftw_execute(p_c_fre);
-                fftw_destroy_plan(p_c_fre);
-                pthread_mutex_unlock(&fft_mutex);
-
-                fftw_ampout_c[9] = sqrt(out_c_fre[9][0] * out_c_fre[9][0] + out_c_fre[9][1] * out_c_fre[9][1]) / (FFT_8000 / 2);
-                fftw_ampout_c[10] = sqrt(out_c_fre[10][0] * out_c_fre[10][0] + out_c_fre[10][1] * out_c_fre[10][1]) / (FFT_8000 / 2);
-                fftw_ampout_c[11] = sqrt(out_c_fre[11][0] * out_c_fre[11][0] + out_c_fre[11][1] * out_c_fre[11][1]) / (FFT_8000 / 2);
-                //--------------г����������ֵ-------------------
-                //�����߲�ֵ   Ƶ�׷ֱ���5Hz
-                /************************************************************Ƶ��**************************************************************************/
-                alpha_c[0] = (fftw_ampout_c[11] - fftw_ampout_c[9]) / fftw_ampout_c[10];
-                //Ƶ��������ʽ
-                deta_c[0] = 0.6666 * alpha_c[0]
-                    - 0.073 * alpha_c[0] * alpha_c[0] * alpha_c[0]
-                    + 0.0126 * alpha_c[0] * alpha_c[0] * alpha_c[0] * alpha_c[0] * alpha_c[0];
-                //Ƶ��������ʽ
-                //���Ĺ�ʽ11    0.2=1/5=2000��/10000Hz   N/fs  ����Ƶ��40000Hz-25us
-                C_fre = (deta_c[0] + 10) / 0.2;
-                if ((C_fre > 47.5) && (C_fre < 55.0))
-                    C_fre_flag = 1;
-                else
-                    C_fre_flag = 0;
-
-                if (C_fre_flag)
-                {
-                    pointfre = (int)(40000 / C_fre + 0.5);
-                    C_FFT_Number = (int)(double(40000 / C_fre) * 10 + 0.5);
-                    if ((C_FFT_Number % 2) != 0)
-                        C_FFT_Number++;
-                    C_FFT++;
-
-                    pthread_mutex_lock(&fft_mutex);
-                    p_c_fuzhi = fftw_plan_dft_1d(C_FFT_Number, in_c_fuzhi, out_c_fuzhi, FFTW_FORWARD, FFTW_ESTIMATE);
-                    p_ci_fuzhi = fftw_plan_dft_1d(C_FFT_Number, in_ci_fuzhi, out_ci_fuzhi, FFTW_FORWARD, FFTW_ESTIMATE);
-                    fftw_execute(p_c_fuzhi);
-                    fftw_execute(p_ci_fuzhi);
-                    fftw_destroy_plan(p_c_fuzhi);
-                    fftw_destroy_plan(p_ci_fuzhi);
-                    pthread_mutex_unlock(&fft_mutex);
-
-                    /*fftw_ampout_c_fuzhi[0] = sqrt(out_c_fuzhi[0][0] * out_c_fuzhi[0][0] + out_c_fuzhi[0][1] * out_c_fuzhi[0][1]) / (C_FFT_Number);
-                    fftw_ampout_ci_fuzhi[0] = sqrt(out_ci_fuzhi[0][0] * out_ci_fuzhi[0][0] + out_ci_fuzhi[0][1] * out_ci_fuzhi[0][1]) / (C_FFT_Number);*/
-                    fftw_ampout_c_fuzhi[0] = out_c_fuzhi[0][0] / C_FFT_Number;
-                    fftw_ampout_ci_fuzhi[0] = out_ci_fuzhi[0][0] / C_FFT_Number;
-                    for (j = 1; j < 420; j++)
-                    {
-                        fftw_ampout_c_fuzhi[j] = sqrt(out_c_fuzhi[j][0] * out_c_fuzhi[j][0] + out_c_fuzhi[j][1] * out_c_fuzhi[j][1]) / (C_FFT_Number / 2);
-                        fftw_ampout_ci_fuzhi[j] = sqrt(out_ci_fuzhi[j][0] * out_ci_fuzhi[j][0] + out_ci_fuzhi[j][1] * out_ci_fuzhi[j][1]) / (C_FFT_Number / 2);
-                    }
-                    for (j = 0; j < (HarmonicWave); j++)       //A���ѹ��������+г��   BC���ѹ����+г��
-                    {
-                        index = j * 10;
-                        //fuzhi_c[j] = fftw_ampout_c_fuzhi[index] / factor_factor;
-                        fuzhi_c_temp[C_HarmonicIndex][j] = fftw_ampout_c_fuzhi[index] / factor_factor;
-                        fftw_phase_c[j] = atan2(out_c_fuzhi[index][1], out_c_fuzhi[index][0]) + PI / 2;
-                        //fuzhi_c_cur[j] = fftw_ampout_ci_fuzhi[index] / factor_factor;
-                        fuzhi_c_cur_temp[C_HarmonicIndex][j] = fftw_ampout_ci_fuzhi[index] / factor_factor;
-                        fftw_phase_c_cur[j] = atan2(out_ci_fuzhi[index][1], out_ci_fuzhi[index][0]) + PI / 2;
-                        if (fabs(fftw_phase_c[j] - fftw_phase_c_cur[j]) > PI)
-                        {
-                            fftw_phase_differ_c[j] = 2 * PI - fabs(fftw_phase_c[j] - fftw_phase_c_cur[j]);
-                        }
-                        else
-                        {
-                            fftw_phase_differ_c[j] = fabs(fftw_phase_c[j] - fftw_phase_c_cur[j]);
-                        }
-                    }
-                    //г����ƽ��ֵ
-                    C_HarmonicIndex++;
-                    if (C_HarmonicIndex == HarmonicWaveParam)
-                    {
-                        C_HarmonicIndex = 0;
-                        for (int j = 0; j < HarmonicWave; j++)
-                        {
-                            for (int i = 0; i < HarmonicWaveParam; i++)
-                            {
-                                fuzhi_c_ave[j] += fuzhi_c_temp[i][j];
-                                fuzhi_c_cur_ave[j] += fuzhi_c_cur_temp[i][j];
-                            }
-                            fuzhi_c_ave[j] = fuzhi_c_ave[j] / HarmonicWaveParam;
-                            fuzhi_c[j] = fuzhi_c_ave[j];    //���ս��
-                            fuzhi_c_ave[j] = 0;
-                            fuzhi_c_cur_ave[j] = fuzhi_c_cur_ave[j] / HarmonicWaveParam;
-                            fuzhi_c_cur[j] = fuzhi_c_cur_ave[j];    //���ս��
-                            fuzhi_c_cur_ave[j] = 0;
-                        }
-                    }
-                    C_jibophase[C_FFT%phase_param2] = fftw_phase_c[1];
-                    for (i = 0; i < C_FFT_Number; i++)  //800������
-                    {
-                        C_sum_vol += buffer_8800_c[i] / factor_factor * buffer_8800_c[i] / factor_factor;
-                        C_sum_cur += buffer_8800_c_cur[i] / factor_factor * buffer_8800_c_cur[i] / factor_factor;
-                        C_active_power_temp += buffer_8800_c[i] / factor_factor * buffer_8800_c_cur[i] / factor_factor;
-                    }
-
-                    C_active_power = C_active_power_temp / C_FFT_Number;//�й�����       ˲ʱ�й����ʵ��ۼ�
-                    C_active_power_meter += C_active_power * 0.2 / 3600 / 1000;//�й����         ��λKW.h
-                    C_rms = sqrt((double)(C_sum_vol / C_FFT_Number));   //��ѹ��Чֵ     ������
-                    C_cur_rms = sqrt((double)(C_sum_cur / C_FFT_Number));   //������Чֵ      ������
-                    C_apparent_power = C_rms * C_cur_rms;//���ڹ���          ��ѹ��Чֵ*������Чֵ
-                    for (j = 2; j < HarmonicWave; j++)
-                    {
-                        C_THDU_temp += fuzhi_c[j] * fuzhi_c[j];
-                        C_THDI_temp += fuzhi_c_cur[j] * fuzhi_c_cur[j];
-                    }
-                    C_THDU = sqrt(C_THDU_temp) / fuzhi_c[1] * 100;
-                    //---------------------------------------------------
-                    C_reactive_power_temp += fuzhi_c[1] * fuzhi_c_cur[1] * sin(fftw_phase_differ_c[1]);//����ϵ��
-                    //�޹�����
-                    C_reactive_power = C_reactive_power_temp / 2;
-                    //�޹����
-                    C_reactive_power_meter += C_reactive_power * 0.2 / 3600 / 1000;
-                    an_buffer_8800flag_C = 0;
-                }
-            }
-            sem_post(&FFT_C_semaphore);
-
-            sem_wait(&FFT_C_semaphore);
-        }
+        fftw_free(in_c_fre);
+        fftw_free(out_c_fre);
         fftw_free(in_c_fuzhi);
         fftw_free(out_c_fuzhi);
         fftw_free(in_ci_fuzhi);
@@ -946,6 +766,7 @@ void C_FlickerDataCopy()
         sem_post(&C_flicker_semaphore);
     }
 }
+
 static double A_Ppointone;
 static double A_Pone;
 static double A_Pthree;
@@ -1350,7 +1171,7 @@ void *A_HalfThreadFunc(void *arg)
     {
 
         sem_wait(&A_halfcalc_semaphore);
-        A_index_400 = an_buffer_idx_A / 400;
+        A_index_400 = an_buffer_idx / 400;
         if (A_index_400 == 0)
         {
             for (h = 0; h < 400; h++)
@@ -1416,7 +1237,7 @@ void *B_HalfThreadFunc(void *arg)
         while (1)
         {
             sem_wait(&B_halfcalc_semaphore);
-            B_index_400 = an_buffer_idx_B / 400;
+            B_index_400 = an_buffer_idx / 400;
             if (B_index_400 == 0)
             {
                 for (h = 0; h < 400; h++)
@@ -1483,7 +1304,7 @@ void *C_HalfThreadFunc(void *arg)
         while (1)
         {
             sem_wait(&C_halfcalc_semaphore);
-            C_index_400 = an_buffer_idx_C / 400;
+            C_index_400 = an_buffer_idx / 400;
             if (C_index_400 == 0)
             {
                 for (h = 0; h < 400; h++)
@@ -1582,39 +1403,6 @@ void *CheckThreadFunc(void *arg)
 {
     while(1)
     {
-        if ((!A_flicker_open)&&(!A_voltage_dipswellinterrupt_open)&& (!B_flicker_open) && (!B_voltage_dipswellinterrupt_open)&& (!C_flicker_open) && (!C_voltage_dipswellinterrupt_open))
-                {
-                    //if (error_flag)
-                    if(0)
-                    {
-                        /*SuspendThread(handlePcap1);
-                        SuspendThread(handlePcap2);
-                        SuspendThread(handlePcap3);
-                        EnterCriticalSection(&g_cs);
-                        */
-                        stand_temp = maxValue(A_temp, B_temp, C_temp);
-                        stand_flag = (stand_temp + 10000) % 65536;
-
-                        an_buffer_idx_A = minValue(index_8800_A, index_8800_B, index_8800_C)*Plus_8000;
-                        an_buffer_idx_B = an_buffer_idx_A;
-                        an_buffer_idx_C = an_buffer_idx_A;
-                        A_FFT = minValue(A_FFT, B_FFT, C_FFT);
-                        B_FFT = A_FFT;
-                        C_FFT = A_FFT;
-                        //A_flag1 = 0;
-                        A_flag2 = 0;
-                        B_flag1 = 0;
-                        B_flag2 = 0;
-                        C_flag1 = 0;
-                        C_flag2 = 0;
-                        error_flag = 0;
-                        /*LeaveCriticalSection(&g_cs);
-                        ResumeThread(handlePcap1);
-                        ResumeThread(handlePcap2);
-                        ResumeThread(handlePcap3);
-                        */
-                    }
-                }
         if ((A_FFT>0)&&(A_FFT %( phase_param1+3)) == 0)
                 {
                     if (A_FFT != A_FFT_last)

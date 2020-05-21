@@ -50,7 +50,7 @@ void *SocketThreadFunc(void *arg)
         //sendto(sock, measuring_results.indicators_array_char, sizeof(measuring_results.indicators_array_char), 0, (sockaddr*)&client_addr, n);
         //if(send_flag_temp==0)
         {
-            printf("%d %d %d %d %d %d\n",an_buffer_idx_A-index_800*800,an_buffer_idx_A,index_800*800,an_buffer[index_800*800],output1,index_800);
+            printf("%d %d %d %d %d %d\n",an_buffer_idx-index_800*800,an_buffer_idx,index_800*800,an_buffer[index_800*800],output1,index_800);
         }
         //sendto(sock, (const void *)(&an_buffer[index_800*800]), 1600, 0, (sockaddr*)&client_addr, n);
         sendto(sock, (const void *)&haha, 4, 0, (sockaddr*)&client_addr, n);

@@ -1,7 +1,6 @@
 #include "pq_linux.h"
 #include <QApplication>
 
-#include <QTextCodec>
 #include <semaphore.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -13,21 +12,19 @@
 #include <signal.h>
 
 
-
-
 struct tm *Start_time;
 time_t start_time;
 char start_time_s[200];
 int threadsum = 0;
 pthread_mutex_t fft_mutex;    //
-static pthread_t handlePcap1,handlePcap2,handlePcap3;
-static pthread_t handleFFT_AThread, handleA_FlickerThread, handleA_HalfPeriodThread;
-static pthread_t handleFFT_BThread, handleB_FlickerThread, handleB_HalfPeriodThread;
-static pthread_t handleFFT_CThread, handleC_FlickerThread, handleC_HalfPeriodThread;
+static pthread_t handlePcap;
+static pthread_t handleFFT_Thread, handleA_FlickerThread, handleA_HalfPeriodThread;
+static pthread_t handleB_FlickerThread, handleB_HalfPeriodThread;
+static pthread_t handleC_FlickerThread, handleC_HalfPeriodThread;
 static pthread_t handle_CheckThread,handleSocketThread;
-sem_t FFT_A_semaphore,A_halfcalc_semaphore,A_flicker_semaphore;
-sem_t FFT_B_semaphore,B_halfcalc_semaphore,B_flicker_semaphore;
-sem_t FFT_C_semaphore,C_halfcalc_semaphore,C_flicker_semaphore;
+sem_t FFT_semaphore,A_halfcalc_semaphore,A_flicker_semaphore;
+sem_t B_halfcalc_semaphore,B_flicker_semaphore;
+sem_t C_halfcalc_semaphore,C_flicker_semaphore;
 sem_t data_send_sem;
 long cpu_num;
 FILE *fp;
@@ -55,31 +52,19 @@ void init()
 }
 void os_create(void)
 {
-    //cpu_set_t mask;
-    //CPU_SET(0x01,&mask);
-    //sched_setaffinity(0,sizeof(mask),&mask);
-
     pthread_mutex_init(&fft_mutex, nullptr);
-    sem_init (&FFT_A_semaphore , 0, 0);
-    sem_init (&FFT_B_semaphore , 0, 0);
-    sem_init (&FFT_C_semaphore , 0, 0);
+    sem_init (&FFT_semaphore , 0, 0);
+
     sem_init (&A_halfcalc_semaphore , 0, 0);
-    sem_init (&B_halfcalc_semaphore , 0, 0);
-    sem_init (&C_halfcalc_semaphore , 0, 0);
+
     sem_init (&data_send_sem , 0, 0);
 
-    pthread_create(&handlePcap1,nullptr,Pcap1ThreadFunc,nullptr);
+    pthread_create(&handlePcap,nullptr,Pcap1ThreadFunc,nullptr);
     threadsum++;
-    pthread_create(&handlePcap2,nullptr,Pcap2ThreadFunc,nullptr);
+
+    pthread_create(&handleFFT_Thread,nullptr,FFT_AThreadFunc, nullptr);
     threadsum++;
-    pthread_create(&handlePcap3,nullptr,Pcap3ThreadFunc,nullptr);
-    threadsum++;
-    pthread_create(&handleFFT_AThread,nullptr,FFT_AThreadFunc, nullptr);
-    threadsum++;
-    pthread_create(&handleFFT_BThread,nullptr,FFT_BThreadFunc, nullptr);
-    threadsum++;
-    pthread_create(&handleFFT_CThread,nullptr,FFT_CThreadFunc, nullptr);
-    threadsum++;
+
     pthread_create(&handleA_HalfPeriodThread,nullptr,A_HalfThreadFunc, nullptr);
     threadsum++;
     pthread_create(&handleB_HalfPeriodThread,nullptr,B_HalfThreadFunc, nullptr);
@@ -111,14 +96,12 @@ void distroy_list()
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    QTextCodec::setCodecForTr(QTextCodec::codecForName("UTF8"));
-    QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF8"));
-    QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF8"));
+
     init();
 
-        os_create();
+    os_create();
 
-        create_list(10,50.0);
+    create_list(10,50.0);
     pq_linux w;
     w.show();
 

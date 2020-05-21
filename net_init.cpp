@@ -32,7 +32,7 @@ for(d=alldevs;d;d=d->next)
 //1表示混杂模式
 //0表示一直等到数据包来
 
-  pcap_t * device = pcap_open_live("eth0", 65535, 1, 0, errBuf);
+  pcap_t * device = pcap_open_live("enp1s0", 65535, 1, 0, errBuf);
 
   if(!device)
   {
@@ -54,73 +54,4 @@ for(d=alldevs;d;d=d->next)
 
   return nullptr;
 }
-void *Pcap2ThreadFunc(void *arg)
-{
-  (void)(arg);
-  char errBuf[PCAP_ERRBUF_SIZE];
 
-  /* open a device, wait until a packet arrives */
-//pcap_t * pcap_open_live(const char * device, int snaplen, int promisc, int to_ms, char * errbuf)
-//1表示混杂模式
-//0表示一直等到数据包来
-
-  pcap_t * device = pcap_open_live("eth0", 65535, 1, 0, errBuf);
-
-  if(!device)
-  {
-    printf("error: pcap_open_live(): %s\n", errBuf);
-    exit(1);
-  }
-
-  /* construct a filter */
-  struct bpf_program filter;
-
-  pcap_compile(device, &filter, packet_filter, 1, 0);
-  pcap_setfilter(device, &filter);
-  //printf("B listening on %s....%d\n",d->name,inum2);
-  /* wait loop forever */
-  int id = 0;
-  //-1表示永远抓包
-  pcap_loop(device, -1, ethernet_protocol_packet_callback_B, (u_char*)&id);
-  pcap_close(device);
-  return nullptr;
-}
-void *Pcap3ThreadFunc(void *arg)
-{
-  (void)(arg);
-
-  char errBuf[PCAP_ERRBUF_SIZE];
-  /* get a device */
-  //devStr = pcap_lookupdev(errBuf);
-
-
-//for(d=alldevs,i=0;i<inum3-1;d=d->next,i++);
-
-  /* open a device, wait until a packet arrives */
-//pcap_t * pcap_open_live(const char * device, int snaplen, int promisc, int to_ms, char * errbuf)
-//1表示混杂模式
-//0表示一直等到数据包来
-
-  pcap_t * device = pcap_open_live("eth0", 65535, 1, 0, errBuf);
-
-  if(!device)
-  {
-    printf("error: pcap_open_live(): %s\n", errBuf);
-    exit(1);
-  }
-
-  /* construct a filter */
-  struct bpf_program filter;
-
-  pcap_compile(device, &filter, packet_filter, 1, 0);
-  pcap_setfilter(device, &filter);
- // printf("C listening on %s....%d\n",d->name,inum3);
-  /* wait loop forever */
-  int id = 0;
-  //-1表示永远抓包
-  pcap_loop(device, -1, ethernet_protocol_packet_callback_C, (u_char*)&id);
-
-  pcap_close(device);
-
-  return nullptr;
-}

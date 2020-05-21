@@ -141,9 +141,8 @@ void pq_linux::update(void)
     ui->A_FFT_flag->setText(tempStr.setNum(A_FFT));
     ui->B_FFT_flag->setText(tempStr.setNum(B_FFT));
     ui->C_FFT_flag->setText(tempStr.setNum(C_FFT));
-    ui->index_a->setText(tempStr.setNum(an_buffer_idx_A));
-    ui->index_b->setText(tempStr.setNum(an_buffer_idx_B));
-    ui->index_c->setText(tempStr.setNum(an_buffer_idx_C));
+    ui->index_a->setText(tempStr.setNum(an_buffer_idx));
+
     {
 
         //static double test_data = 50.0;
@@ -814,9 +813,7 @@ void pq_linux::fuwei(void)
         A_FFT = 0;
         B_FFT = 0;
         C_FFT = 0;
-        an_buffer_idx_A = 0;
-        an_buffer_idx_B = 0;
-        an_buffer_idx_C = 0;
+        an_buffer_idx = 0;
         fftw_phase_a_vol[1] = 0;
         fftw_phase_b[1] = 0;
         fftw_phase_c[1] = 0;

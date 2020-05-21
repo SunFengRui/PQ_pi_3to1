@@ -36,18 +36,20 @@ typedef struct
         short an_ch4;
         short an_ch5;
         unsigned short stand_flag;
-    #else
-        int an_ch0;
-        int an_ch3;
-        int an_ch2;
-        int an_ch1;
-
+    #else      
+        int A_U;
+        int A_I;
+        int B_U;
+        int B_I;
+        int C_U;
+        int C_I;
         int a1;
         int a2;
         int a3;
         int a4;
         int a5;
         int a6;
+
         u_short check;
         u_short stand_flag;
 
@@ -64,7 +66,7 @@ typedef union _measuring_results_union
 }measuring_results_union;
 
 extern int A_packet_number, B_packet_number, C_packet_number;
-extern unsigned long an_buffer_idx_A;
+extern unsigned long an_buffer_idx;
 extern u_int A_err_flag, B_err_flag, C_err_flag;
 extern u_short  A_err_current, B_err_current, C_err_current;
 extern unsigned long  A_err_sum, B_err_sum, C_err_sum;
