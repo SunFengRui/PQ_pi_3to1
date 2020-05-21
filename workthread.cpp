@@ -384,23 +384,17 @@ void *FFT_AThreadFunc(void *arg)
                 fftw_ampout_a_fre[9] = sqrt(out[9][0] * out[9][0] + out[9][1] * out[9][1]) / (FFT_8000 / 2);
                 fftw_ampout_a_fre[10] = sqrt(out[10][0] * out[10][0] + out[10][1] * out[10][1]) / (FFT_8000 / 2);
                 fftw_ampout_a_fre[11] = sqrt(out[11][0] * out[11][0] + out[11][1] * out[11][1]) / (FFT_8000 / 2);
-                //--------------г����������ֵ-------------------
-                //�����߲�ֵ   Ƶ�׷ֱ���5Hz
+
                 /************************************************************Ƶ��**************************************************************************/
                 alpha_a[0] = (fftw_ampout_a_fre[11] - fftw_ampout_a_fre[9]) / fftw_ampout_a_fre[10];
-                //Ƶ��������ʽ
+
                 deta_a[0] = 0.6666 * alpha_a[0]
                     - 0.073 * alpha_a[0] * alpha_a[0] * alpha_a[0]
                     + 0.0126 * alpha_a[0] * alpha_a[0] * alpha_a[0] * alpha_a[0] * alpha_a[0];
-                //Ƶ��������ʽ
+
                 //���Ĺ�ʽ11    0.2=1/5=2000��/10000Hz   N/fs  ����Ƶ��40000Hz-25us
                 A_fre = (deta_a[0] + 10) / 0.2;
-
-
-
-
-
-
+                ChangeData(list_f, A_fre);
                 if ((A_fre > 47.5) && (A_fre < 55.0))
                     A_fre_flag = 1;
                 else

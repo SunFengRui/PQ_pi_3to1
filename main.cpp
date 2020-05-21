@@ -1,6 +1,7 @@
 #include "pq_linux.h"
 #include <QApplication>
 
+#include <QTextCodec>
 #include <semaphore.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -10,6 +11,9 @@
 #include "main.h"
 #include <sys/time.h>
 #include <signal.h>
+
+
+
 
 struct tm *Start_time;
 time_t start_time;
@@ -107,6 +111,9 @@ void distroy_list()
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
+    QTextCodec::setCodecForTr(QTextCodec::codecForName("UTF8"));
+    QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF8"));
+    QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF8"));
     init();
 
         os_create();
