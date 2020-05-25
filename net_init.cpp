@@ -8,7 +8,7 @@ static char packet_filter[] = "ip and udp and ether[29] & 0xff = 0x0a";
 static char packet_filter[] = "ether[12] =0x88 and ether[13] = 0xbb";
 #endif
 
-void *Pcap1ThreadFunc(void *arg)
+void *PcapThreadFunc(void *arg)
 {
   (void)(arg);
   int i=0;
@@ -32,7 +32,7 @@ for(d=alldevs;d;d=d->next)
 //1表示混杂模式
 //0表示一直等到数据包来
 
-  pcap_t * device = pcap_open_live("enp1s0", 65535, 1, 0, errBuf);
+  pcap_t * device = pcap_open_live("eth0", 65535, 1, 0, errBuf);
 
   if(!device)
   {
@@ -48,7 +48,7 @@ for(d=alldevs;d;d=d->next)
 
   int id = 0;
   //-1表示永远抓包
-  pcap_loop(device, -1, ethernet_protocol_packet_callback_A, (u_char*)&id);
+  pcap_loop(device, -1, ethernet_protocol_packet_callback, (u_char*)&id);
 
   pcap_close(device);
 

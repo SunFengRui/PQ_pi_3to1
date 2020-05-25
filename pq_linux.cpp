@@ -704,9 +704,7 @@ void pq_linux::update(void)
         ui->C_changshishanbianzhi->setText(tmp);
     }
 
-    ui->A_receivecount->setText(tempStr.setNum(A_packet_number));
-    ui->B_receivecount->setText(tempStr.setNum(B_packet_number));
-    ui->C_receivecount->setText(tempStr.setNum(C_packet_number));
+    ui->receivecount->setText(tempStr.setNum(packet_number));
     {
         ui->A_loss->setText(tempStr.setNum(A_err_flag));
         ui->A_loss_current->setText(tempStr.setNum(A_err_current));
@@ -721,9 +719,7 @@ void pq_linux::update(void)
     ui->point_count->setText(tempStr.setNum(pointfre));
     ui->FFT_Number->setText(tempStr.setNum(A_FFT_Number));
 
-    A_packet_number = 0;
-    B_packet_number = 0;
-    C_packet_number = 0;
+    packet_number = 0;
 }
 extern char output_flag;
 extern char send_flag_temp;
@@ -857,9 +853,7 @@ void pq_linux::fuwei(void)
         uneg_param1 = 0;
         uneg_param2 = 0;
         uneg = 0;
-        A_packet_number = 0;
-        B_packet_number = 0;
-        C_packet_number = 0;
+        packet_number = 0;
         pointfre = 0;
         A_FFT_Number = 0;
         C_reactive_power = 0;

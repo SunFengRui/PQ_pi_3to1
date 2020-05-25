@@ -1,6 +1,7 @@
 #include "pq_linux.h"
 #include <QApplication>
 
+#include <QTextCodec>
 #include <semaphore.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -59,10 +60,10 @@ void os_create(void)
 
     sem_init (&data_send_sem , 0, 0);
 
-    pthread_create(&handlePcap,nullptr,Pcap1ThreadFunc,nullptr);
+    pthread_create(&handlePcap,nullptr,PcapThreadFunc,nullptr);
     threadsum++;
 
-    pthread_create(&handleFFT_Thread,nullptr,FFT_AThreadFunc, nullptr);
+    pthread_create(&handleFFT_Thread,nullptr,FFT_ThreadFunc, nullptr);
     threadsum++;
 
     pthread_create(&handleA_HalfPeriodThread,nullptr,A_HalfThreadFunc, nullptr);
@@ -96,7 +97,9 @@ void distroy_list()
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-
+    QTextCodec::setCodecForTr(QTextCodec::codecForName("UTF8"));
+    QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF8"));
+    QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF8"));
     init();
 
     os_create();

@@ -16,6 +16,5 @@ extern sem_t C_halfcalc_semaphore,C_flicker_semaphore;
 extern sem_t data_send_sem;
 extern long cpu_num;
 extern FILE *fp;
-extern int index_800;
 extern DList *list_f;
 #endif // MAIN_H

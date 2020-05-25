@@ -18,7 +18,7 @@
     <rect>
      <x>220</x>
      <y>20</y>
-     <width>201</width>
+     <width>311</width>
      <height>41</height>
     </rect>
    </property>
@@ -31,7 +31,7 @@
     <number>1</number>
    </property>
    <property name="text">
-    <string>电能质量分析</string>
+    <string>电能质量分析(3to1)</string>
    </property>
   </widget>
   <widget class="QWidget" name="layoutWidget">
@@ -3912,48 +3912,6 @@
     </widget>
    </widget>
   </widget>
-  <widget class="QWidget" name="layoutWidget_8">
-   <property name="geometry">
-    <rect>
-     <x>840</x>
-     <y>30</y>
-     <width>152</width>
-     <height>92</height>
-    </rect>
-   </property>
-   <layout class="QGridLayout" name="gridLayout_8">
-    <item row="0" column="0">
-     <widget class="QLabel" name="label_64">
-      <property name="text">
-       <string>A相接收数据:</string>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="1">
-     <widget class="QLineEdit" name="A_receivecount"/>
-    </item>
-    <item row="1" column="0">
-     <widget class="QLabel" name="label_65">
-      <property name="text">
-       <string>B相接收数据:</string>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="1">
-     <widget class="QLineEdit" name="B_receivecount"/>
-    </item>
-    <item row="2" column="0">
-     <widget class="QLabel" name="label_66">
-      <property name="text">
-       <string>C相接收数据:</string>
-      </property>
-     </widget>
-    </item>
-    <item row="2" column="1">
-     <widget class="QLineEdit" name="C_receivecount"/>
-    </item>
-   </layout>
-  </widget>
   <widget class="QWidget" name="layoutWidget_59">
    <property name="geometry">
     <rect>
@@ -4055,6 +4013,28 @@
    <property name="text">
     <string>测试接口:</string>
    </property>
+  </widget>
+  <widget class="QWidget" name="">
+   <property name="geometry">
+    <rect>
+     <x>841</x>
+     <y>34</y>
+     <width>121</width>
+     <height>24</height>
+    </rect>
+   </property>
+   <layout class="QFormLayout" name="formLayout_5">
+    <item row="0" column="0">
+     <widget class="QLabel" name="label_64">
+      <property name="text">
+       <string>数据接收:</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="1">
+     <widget class="QLineEdit" name="receivecount"/>
+    </item>
+   </layout>
   </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>

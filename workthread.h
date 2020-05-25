@@ -65,14 +65,12 @@ typedef union _measuring_results_union
     char    indicators_array_char[240];
 }measuring_results_union;
 
-extern int A_packet_number, B_packet_number, C_packet_number;
+extern int packet_number ;
 extern unsigned long an_buffer_idx;
 extern u_int A_err_flag, B_err_flag, C_err_flag;
 extern u_short  A_err_current, B_err_current, C_err_current;
 extern unsigned long  A_err_sum, B_err_sum, C_err_sum;
 extern u_short A_flag, B_flag, C_flag;
-extern unsigned long an_buffer_idx_B;
-extern unsigned long an_buffer_idx_C;
 extern double A_rms, B_rms, C_rms;//
 extern double A_cur_rms, B_cur_rms, C_cur_rms;//
 extern double A_active_power;//
@@ -157,18 +155,14 @@ extern double BA_phase_average, CA_phase_average;
 extern measuring_results_union measuring_results;
 extern volatile short an_buffer[AN_BUFFER_880kLEN];
 extern double a_channel_index;
-void ethernet_protocol_packet_callback_A(u_char * arg, const struct pcap_pkthdr * pkthdr, const u_char * packet);
-void ethernet_protocol_packet_callback_B(u_char * arg, const struct pcap_pkthdr * pkthdr, const u_char * packet);
-void ethernet_protocol_packet_callback_C(u_char * arg, const struct pcap_pkthdr * pkthdr, const u_char * packet);
-void *FFT_AThreadFunc(void *arg);
+void ethernet_protocol_packet_callback(u_char * arg, const struct pcap_pkthdr * pkthdr, const u_char * packet);
+void *FFT_ThreadFunc(void *arg);
 void *A_FlickerThreadFunc(void *arg);
 void *A_HalfThreadFunc(void *arg);
 
-void *FFT_BThreadFunc(void *arg);
 void *B_FlickerThreadFunc(void *arg);
 void *B_HalfThreadFunc(void *arg);
 
-void *FFT_CThreadFunc(void *arg);
 void *C_FlickerThreadFunc(void *arg);
 void *C_HalfThreadFunc(void *arg);
 

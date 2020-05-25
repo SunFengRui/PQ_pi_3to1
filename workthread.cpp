@@ -17,7 +17,7 @@ double a_channel_index=1.01278;
 
 short test;
 int test2;
-int A_packet_number;
+int packet_number;
 
 volatile short an_buffer[AN_BUFFER_880kLEN];
 static short an_buffer_cur[AN_BUFFER_880kLEN];
@@ -43,8 +43,6 @@ static int packet_offset=42;
 static int packet_offset=16;
 #endif
 
-
-int B_packet_number;
 static char B_fre_flag = 0;
 static int index_8800_B = 0;
 static short an_buffer_b[AN_BUFFER_880kLEN];
@@ -57,8 +55,6 @@ unsigned long B_err_sum;
 
 u_short  B_flag;
 
-
-int C_packet_number;
 static char C_fre_flag = 0;
 static int index_8800_C = 0;
 static short an_buffer_c[AN_BUFFER_880kLEN];
@@ -70,7 +66,7 @@ unsigned long C_err_sum;
 
 u_short  C_flag;
 
-void ethernet_protocol_packet_callback_A(u_char * arg, const struct pcap_pkthdr * pkthdr, const u_char * packet)
+void ethernet_protocol_packet_callback(u_char * arg, const struct pcap_pkthdr * pkthdr, const u_char * packet)
 {
     an_point *sample;
     (void)(arg);
@@ -116,6 +112,8 @@ void ethernet_protocol_packet_callback_A(u_char * arg, const struct pcap_pkthdr 
              {
                index_8800_A = an_buffer_idx / Plus_8000;
                an_buffer_8800flag_A = 1;
+               an_buffer_8800flag_B = 1;
+               an_buffer_8800flag_C = 1;
                sem_post(&FFT_semaphore);
              }
         }
@@ -132,7 +130,7 @@ void ethernet_protocol_packet_callback_A(u_char * arg, const struct pcap_pkthdr 
             an_buffer_idx++;
         }
      }
-    A_packet_number = 1;
+    packet_number = 1;
 }
 double A_rms = 0;//
 double A_cur_rms;//
@@ -206,7 +204,7 @@ double C_rms = 0;
 double C_cur_rms;
 u_long C_FFT = 0;
 static double C_jibophase[100];
-void *FFT_AThreadFunc(void *arg)
+void *FFT_ThreadFunc(void *arg)
 {
         int i, j;
         double fftw_ampout_a_fre[AN_FFT_LEN_8000];
@@ -427,7 +425,7 @@ void *FFT_AThreadFunc(void *arg)
                }
             }
 
-            if (an_buffer_8800flag_A == 1)
+            if (an_buffer_8800flag_B == 1)
                         {
                             B_sum_vol = 0; B_sum_cur = 0; B_active_power_temp = 0; B_reactive_power_temp = 0; B_THDU_temp = 0; B_THDI_temp = 0;
                             for (int h = 0; h < Plus_8000; h++)
@@ -564,7 +562,7 @@ void *FFT_AThreadFunc(void *arg)
                             }
                         }
 
-            if (an_buffer_8800flag_A == 1)
+            if (an_buffer_8800flag_C == 1)
                         {
                             C_sum_vol = 0; C_sum_cur = 0; C_reactive_power_temp = 0; C_active_power_temp = 0; C_THDU_temp = 0; C_THDI_temp = 0;
                             for (int h = 0; h < Plus_8000; h++)
@@ -1437,5 +1435,5 @@ void *CheckThreadFunc(void *arg)
 
 void OneMinuteTimerCallbackFunc(int s)
 {
-    error_flag = 1;
+    //error_flag = 1;
 }

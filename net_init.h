@@ -3,8 +3,7 @@
 
 
 
-void *Pcap1ThreadFunc(void *arg);
-void *Pcap2ThreadFunc(void *arg);
-void *Pcap3ThreadFunc(void *arg);
+void *PcapThreadFunc(void *arg);
+
 #endif // NET_INIT_H
 
