@@ -31,7 +31,7 @@ long cpu_num;
 FILE *fp;
 void init()
 {
-    fp=fopen("/home/sun/PQ.txt","w+");
+    fp=fopen("/home/pi/PQ.txt","w+");
 
     cpu_num=sysconf(_SC_NPROCESSORS_ONLN);
 

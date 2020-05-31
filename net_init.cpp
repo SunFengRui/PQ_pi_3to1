@@ -5,7 +5,8 @@
 #if(AD_SAMPLE_ACCURACY==16)
 static char packet_filter[] = "ip and udp and ether[29] & 0xff = 0x0a";
 #else
-static char packet_filter[] = "ether[12] =0x88 and ether[13] = 0xbb";
+//static char packet_filter[] = "ether[12] =0x88 and ether[13] = 0xbb";
+static char packet_filter[] = "ether[12] =0x01 and ether[13] = 0xc0";
 #endif
 
 void *PcapThreadFunc(void *arg)

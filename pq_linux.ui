@@ -34,80 +34,6 @@
     <string>电能质量分析(3to1)</string>
    </property>
   </widget>
-  <widget class="QWidget" name="layoutWidget">
-   <property name="geometry">
-    <rect>
-     <x>40</x>
-     <y>161</y>
-     <width>161</width>
-     <height>156</height>
-    </rect>
-   </property>
-   <layout class="QFormLayout" name="formLayout_3">
-    <item row="0" column="0">
-     <widget class="QLabel" name="label_272">
-      <property name="text">
-       <string>通道系数</string>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="1">
-     <widget class="QLineEdit" name="channel_index">
-      <property name="text">
-       <string>1.0032</string>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="0">
-     <widget class="QLabel" name="label_273">
-      <property name="text">
-       <string>真实值</string>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="1">
-     <widget class="QLineEdit" name="real_value"/>
-    </item>
-    <item row="2" column="0">
-     <widget class="QLabel" name="label_275">
-      <property name="text">
-       <string>测试值</string>
-      </property>
-     </widget>
-    </item>
-    <item row="2" column="1">
-     <widget class="QLineEdit" name="test_value">
-      <property name="text">
-       <string/>
-      </property>
-     </widget>
-    </item>
-    <item row="3" column="0">
-     <widget class="QLabel" name="label_274">
-      <property name="text">
-       <string>额定值</string>
-      </property>
-     </widget>
-    </item>
-    <item row="3" column="1">
-     <widget class="QLineEdit" name="rated_value">
-      <property name="text">
-       <string>2.94628</string>
-      </property>
-     </widget>
-    </item>
-    <item row="4" column="0">
-     <widget class="QLabel" name="label_276">
-      <property name="text">
-       <string>误差</string>
-      </property>
-     </widget>
-    </item>
-    <item row="4" column="1">
-     <widget class="QLineEdit" name="cal_error"/>
-    </item>
-   </layout>
-  </widget>
   <widget class="QWidget" name="layoutWidget_57">
    <property name="geometry">
     <rect>
@@ -217,7 +143,7 @@
     </rect>
    </property>
    <property name="currentIndex">
-    <number>8</number>
+    <number>6</number>
    </property>
    <widget class="QWidget" name="tab">
     <attribute name="title">
@@ -3572,48 +3498,6 @@
       </item>
      </layout>
     </widget>
-    <widget class="QWidget" name="layoutWidget_12">
-     <property name="geometry">
-      <rect>
-       <x>160</x>
-       <y>470</y>
-       <width>151</width>
-       <height>92</height>
-      </rect>
-     </property>
-     <layout class="QGridLayout" name="gridLayout_10">
-      <item row="0" column="0">
-       <widget class="QLabel" name="label_70">
-        <property name="text">
-         <string>index_a</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QLineEdit" name="index_a"/>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="label_71">
-        <property name="text">
-         <string>index_b</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QLineEdit" name="index_b"/>
-      </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="label_72">
-        <property name="text">
-         <string>index_c</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1">
-       <widget class="QLineEdit" name="index_c"/>
-      </item>
-     </layout>
-    </widget>
     <widget class="QWidget" name="layoutWidget_13">
      <property name="geometry">
       <rect>
@@ -3701,7 +3585,7 @@
     <widget class="QWidget" name="layoutWidget_24">
      <property name="geometry">
       <rect>
-       <x>110</x>
+       <x>350</x>
        <y>150</y>
        <width>163</width>
        <height>92</height>
@@ -3711,116 +3595,32 @@
       <item row="0" column="0">
        <widget class="QLabel" name="label_102">
         <property name="text">
-         <string>A相丢包次数：</string>
+         <string>丢包次数：</string>
         </property>
        </widget>
       </item>
       <item row="0" column="1">
-       <widget class="QLineEdit" name="A_loss"/>
+       <widget class="QLineEdit" name="loss"/>
       </item>
       <item row="1" column="0">
        <widget class="QLabel" name="label_103">
         <property name="text">
-         <string>A相丢包数：</string>
+         <string>丢包数：</string>
         </property>
        </widget>
       </item>
       <item row="1" column="1">
-       <widget class="QLineEdit" name="A_loss_current"/>
+       <widget class="QLineEdit" name="loss_current"/>
       </item>
       <item row="2" column="0">
        <widget class="QLabel" name="label_104">
         <property name="text">
-         <string>A相丢包总数：</string>
+         <string>丢包总数：</string>
         </property>
        </widget>
       </item>
       <item row="2" column="1">
-       <widget class="QLineEdit" name="A_loss_sum"/>
-      </item>
-     </layout>
-    </widget>
-    <widget class="QWidget" name="layoutWidget_25">
-     <property name="geometry">
-      <rect>
-       <x>350</x>
-       <y>150</y>
-       <width>163</width>
-       <height>92</height>
-      </rect>
-     </property>
-     <layout class="QGridLayout" name="gridLayout_15">
-      <item row="0" column="0">
-       <widget class="QLabel" name="label_105">
-        <property name="text">
-         <string>B相丢包次数：</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QLineEdit" name="B_loss"/>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="label_106">
-        <property name="text">
-         <string>B相丢包数：</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QLineEdit" name="B_loss_current"/>
-      </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="label_107">
-        <property name="text">
-         <string>B相丢包总数：</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1">
-       <widget class="QLineEdit" name="B_loss_sum"/>
-      </item>
-     </layout>
-    </widget>
-    <widget class="QWidget" name="layoutWidget_26">
-     <property name="geometry">
-      <rect>
-       <x>600</x>
-       <y>150</y>
-       <width>163</width>
-       <height>92</height>
-      </rect>
-     </property>
-     <layout class="QGridLayout" name="gridLayout_16">
-      <item row="0" column="0">
-       <widget class="QLabel" name="label_108">
-        <property name="text">
-         <string>C相丢包次数：</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QLineEdit" name="C_loss"/>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="label_109">
-        <property name="text">
-         <string>C相丢包数：</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QLineEdit" name="C_loss_current"/>
-      </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="label_110">
-        <property name="text">
-         <string>C相丢包总数：</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1">
-       <widget class="QLineEdit" name="C_loss_sum"/>
+       <widget class="QLineEdit" name="loss_sum"/>
       </item>
      </layout>
     </widget>
@@ -3860,40 +3660,28 @@
       <string>三相不平衡度测量</string>
      </property>
     </widget>
-   </widget>
-   <widget class="QWidget" name="tab_8">
-    <attribute name="title">
-     <string>曲线图</string>
-    </attribute>
-    <widget class="QGraphicsView" name="curve">
+    <widget class="QLabel" name="label_70">
      <property name="geometry">
       <rect>
-       <x>80</x>
-       <y>10</y>
-       <width>921</width>
-       <height>611</height>
+       <x>161</x>
+       <y>474</y>
+       <width>42</width>
+       <height>16</height>
       </rect>
+     </property>
+     <property name="text">
+      <string>index</string>
      </property>
     </widget>
-    <widget class="QComboBox" name="curve_open">
+    <widget class="QLineEdit" name="index">
      <property name="geometry">
       <rect>
-       <x>0</x>
-       <y>20</y>
-       <width>71</width>
-       <height>26</height>
+       <x>209</x>
+       <y>474</y>
+       <width>101</width>
+       <height>22</height>
       </rect>
      </property>
-     <item>
-      <property name="text">
-       <string>open</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>close</string>
-      </property>
-     </item>
     </widget>
    </widget>
    <widget class="QWidget" name="tab_9">
@@ -3957,8 +3745,8 @@
   <widget class="QWidget" name="layoutWidget_60">
    <property name="geometry">
     <rect>
-     <x>80</x>
-     <y>400</y>
+     <x>90</x>
+     <y>630</y>
      <width>116</width>
      <height>92</height>
     </rect>
@@ -4004,8 +3792,8 @@
   <widget class="QLabel" name="label_271">
    <property name="geometry">
     <rect>
-     <x>80</x>
-     <y>370</y>
+     <x>90</x>
+     <y>600</y>
      <width>81</width>
      <height>18</height>
     </rect>
@@ -4014,7 +3802,7 @@
     <string>测试接口:</string>
    </property>
   </widget>
-  <widget class="QWidget" name="">
+  <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
      <x>841</x>
@@ -4033,6 +3821,162 @@
     </item>
     <item row="0" column="1">
      <widget class="QLineEdit" name="receivecount"/>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QWidget" name="">
+   <property name="geometry">
+    <rect>
+     <x>34</x>
+     <y>174</y>
+     <width>171</width>
+     <height>164</height>
+    </rect>
+   </property>
+   <layout class="QFormLayout" name="formLayout_3">
+    <item row="0" column="0">
+     <widget class="QLabel" name="label_272">
+      <property name="text">
+       <string>A_U通道系数:</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="1">
+     <widget class="QLineEdit" name="A_U_channel_index">
+      <property name="text">
+       <string>1.00</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="0">
+     <widget class="QLabel" name="label_278">
+      <property name="text">
+       <string>A_I通道系数:</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="1">
+     <widget class="QLineEdit" name="A_I_channel_index">
+      <property name="text">
+       <string>1.00</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="0">
+     <widget class="QLabel" name="label_281">
+      <property name="text">
+       <string>B_U通道系数:</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="1">
+     <widget class="QLineEdit" name="B_U_channel_index">
+      <property name="text">
+       <string>1.00</string>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="0">
+     <widget class="QLabel" name="label_282">
+      <property name="text">
+       <string>B_I通道系数:</string>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="1">
+     <widget class="QLineEdit" name="B_I_channel_index">
+      <property name="text">
+       <string>1.00</string>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="0">
+     <widget class="QLabel" name="label_283">
+      <property name="text">
+       <string>C_U通道系数:</string>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="1">
+     <widget class="QLineEdit" name="C_U_channel_index">
+      <property name="text">
+       <string>1.00</string>
+      </property>
+     </widget>
+    </item>
+    <item row="5" column="0">
+     <widget class="QLabel" name="label_284">
+      <property name="text">
+       <string>C_I通道系数:</string>
+      </property>
+     </widget>
+    </item>
+    <item row="5" column="1">
+     <widget class="QLineEdit" name="C_I_channel_index">
+      <property name="text">
+       <string>1.00</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QWidget" name="">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>410</y>
+     <width>152</width>
+     <height>108</height>
+    </rect>
+   </property>
+   <layout class="QFormLayout" name="formLayout_36">
+    <item row="0" column="0">
+     <widget class="QLabel" name="label_273">
+      <property name="text">
+       <string>真实值</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="1">
+     <widget class="QLineEdit" name="real_value"/>
+    </item>
+    <item row="1" column="0">
+     <widget class="QLabel" name="label_275">
+      <property name="text">
+       <string>测试值</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="1">
+     <widget class="QLineEdit" name="test_value">
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="0">
+     <widget class="QLabel" name="label_274">
+      <property name="text">
+       <string>额定值</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="1">
+     <widget class="QLineEdit" name="rated_value">
+      <property name="text">
+       <string>2.94628</string>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="0">
+     <widget class="QLabel" name="label_276">
+      <property name="text">
+       <string>误差</string>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="1">
+     <widget class="QLineEdit" name="cal_error"/>
     </item>
    </layout>
   </widget>

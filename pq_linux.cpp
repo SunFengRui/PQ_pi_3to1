@@ -66,7 +66,12 @@ pq_linux::~pq_linux()
 void pq_linux::calculate(void)
 {
     char tmp[100];
-    a_channel_index=ui->channel_index->text().toDouble();
+    A_U_channel_index=ui->A_U_channel_index->text().toDouble();
+    A_I_channel_index=ui->A_I_channel_index->text().toDouble();
+    B_U_channel_index=ui->B_U_channel_index->text().toDouble();
+    B_I_channel_index=ui->B_I_channel_index->text().toDouble();
+    C_U_channel_index=ui->C_U_channel_index->text().toDouble();
+    C_I_channel_index=ui->C_I_channel_index->text().toDouble();
     double real_value=ui->real_value->text().toDouble();
     double rated_value=ui->rated_value->text().toDouble();
     double cal_error=(A_rms-real_value)/rated_value*10000;
@@ -141,7 +146,7 @@ void pq_linux::update(void)
     ui->A_FFT_flag->setText(tempStr.setNum(A_FFT));
     ui->B_FFT_flag->setText(tempStr.setNum(B_FFT));
     ui->C_FFT_flag->setText(tempStr.setNum(C_FFT));
-    ui->index_a->setText(tempStr.setNum(an_buffer_idx));
+    ui->index->setText(tempStr.setNum(an_buffer_idx));
 
     {
 
@@ -706,15 +711,9 @@ void pq_linux::update(void)
 
     ui->receivecount->setText(tempStr.setNum(packet_number));
     {
-        ui->A_loss->setText(tempStr.setNum(A_err_flag));
-        ui->A_loss_current->setText(tempStr.setNum(A_err_current));
-        ui->A_loss_sum->setText(tempStr.setNum(A_err_sum));
-        ui->B_loss->setText(tempStr.setNum(B_err_flag));
-        ui->B_loss_current->setText(tempStr.setNum(B_err_current));
-        ui->B_loss_sum->setText(tempStr.setNum(B_err_sum));
-        ui->C_loss->setText(tempStr.setNum(C_err_flag));
-        ui->C_loss_current->setText(tempStr.setNum(C_err_current));
-        ui->C_loss_sum->setText(tempStr.setNum(C_err_sum));
+        ui->loss->setText(tempStr.setNum(A_err_flag));
+        ui->loss_current->setText(tempStr.setNum(A_err_current));
+        ui->loss_sum->setText(tempStr.setNum(A_err_sum));
     }
     ui->point_count->setText(tempStr.setNum(pointfre));
     ui->FFT_Number->setText(tempStr.setNum(A_FFT_Number));

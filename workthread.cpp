@@ -13,7 +13,12 @@
 #include <unistd.h>
 
 //修正系数
-double a_channel_index=1.01278;
+double  A_U_channel_index=1.00;
+double  A_I_channel_index=1.00;
+double  B_U_channel_index=1.00;
+double  B_I_channel_index=1.00;
+double  C_U_channel_index=1.00;
+double  C_I_channel_index=1.00;
 
 short test;
 int test2;
@@ -40,7 +45,7 @@ char output_flag=0;
 #if(AD_SAMPLE_ACCURACY==16)
 static int packet_offset=42;
 #else
-static int packet_offset=16;
+static u_char packet_offset=14;
 #endif
 
 static char B_fre_flag = 0;
@@ -84,17 +89,168 @@ void ethernet_protocol_packet_callback(u_char * arg, const struct pcap_pkthdr * 
     {
     if (an_buffer_idx < AN_BUFFER_880kLEN)
     {
-            an_buffer[an_buffer_idx] = ntohl(sample->A_U)/4;//
-            an_buffer_cur[an_buffer_idx] = ntohl(sample->A_I)/4;//
-            an_buffer[an_buffer_idx]=an_buffer[an_buffer_idx]*a_channel_index;
-            an_buffer_b[an_buffer_idx] = ntohl(sample->B_U) / 4;//
-            an_buffer_b_cur[an_buffer_idx] = ntohl(sample->B_I) / 4;//
-            an_buffer_c[an_buffer_idx] = ntohl(sample->C_U) / 4;//
-            an_buffer_c_cur[an_buffer_idx] = ntohl(sample->C_I) / 4;//
+            an_buffer[an_buffer_idx] = A_U_channel_index*ntohl(sample->A_U_1)/4;//
+            an_buffer_cur[an_buffer_idx] = A_I_channel_index*ntohl(sample->A_I_1)/4;//
+            an_buffer_b[an_buffer_idx] = B_U_channel_index*ntohl(sample->B_U_1) / 4;//
+            an_buffer_b_cur[an_buffer_idx] = B_I_channel_index*ntohl(sample->B_I_1) / 4;//
+            an_buffer_c[an_buffer_idx] = C_U_channel_index*ntohl(sample->C_U_1) / 4;//
+            an_buffer_c_cur[an_buffer_idx] = C_I_channel_index*ntohl(sample->C_I_1) / 4;//
             an_buffer_idx++;
-             if(output_flag==0)
+
+            an_buffer[an_buffer_idx] = A_U_channel_index*ntohl(sample->A_U_2)/4;//
+            an_buffer_cur[an_buffer_idx] = A_I_channel_index*ntohl(sample->A_I_2)/4;//
+            an_buffer_b[an_buffer_idx] = B_U_channel_index*ntohl(sample->B_U_2) / 4;//
+            an_buffer_b_cur[an_buffer_idx] = B_I_channel_index*ntohl(sample->B_I_2) / 4;//
+            an_buffer_c[an_buffer_idx] = C_U_channel_index*ntohl(sample->C_U_2) / 4;//
+            an_buffer_c_cur[an_buffer_idx] = C_I_channel_index*ntohl(sample->C_I_2) / 4;//
+            an_buffer_idx++;
+
+            an_buffer[an_buffer_idx] = A_U_channel_index*ntohl(sample->A_U_3)/4;//
+            an_buffer_cur[an_buffer_idx] = A_I_channel_index*ntohl(sample->A_I_3)/4;//
+            an_buffer_b[an_buffer_idx] = B_U_channel_index*ntohl(sample->B_U_3) / 4;//
+            an_buffer_b_cur[an_buffer_idx] = B_I_channel_index*ntohl(sample->B_I_3) / 4;//
+            an_buffer_c[an_buffer_idx] = C_U_channel_index*ntohl(sample->C_U_3) / 4;//
+            an_buffer_c_cur[an_buffer_idx] = C_I_channel_index*ntohl(sample->C_I_3) / 4;//
+            an_buffer_idx++;
+
+            an_buffer[an_buffer_idx] = A_U_channel_index*ntohl(sample->A_U_4)/4;//
+            an_buffer_cur[an_buffer_idx] = A_I_channel_index*ntohl(sample->A_I_4)/4;//
+            an_buffer_b[an_buffer_idx] = B_U_channel_index*ntohl(sample->B_U_4) / 4;//
+            an_buffer_b_cur[an_buffer_idx] = B_I_channel_index*ntohl(sample->B_I_4) / 4;//
+            an_buffer_c[an_buffer_idx] = C_U_channel_index*ntohl(sample->C_U_4) / 4;//
+            an_buffer_c_cur[an_buffer_idx] = C_I_channel_index*ntohl(sample->C_I_4) / 4;//
+            an_buffer_idx++;
+
+            an_buffer[an_buffer_idx] = A_U_channel_index*ntohl(sample->A_U_5)/4;//
+            an_buffer_cur[an_buffer_idx] = A_I_channel_index*ntohl(sample->A_I_5)/4;//
+            an_buffer_b[an_buffer_idx] = B_U_channel_index*ntohl(sample->B_U_5) / 4;//
+            an_buffer_b_cur[an_buffer_idx] = B_I_channel_index*ntohl(sample->B_I_5) / 4;//
+            an_buffer_c[an_buffer_idx] = C_U_channel_index*ntohl(sample->C_U_5) / 4;//
+            an_buffer_c_cur[an_buffer_idx] = C_I_channel_index*ntohl(sample->C_I_5) / 4;//
+            an_buffer_idx++;
+
+            an_buffer[an_buffer_idx] = A_U_channel_index*ntohl(sample->A_U_6)/4;//
+            an_buffer_cur[an_buffer_idx] = A_I_channel_index*ntohl(sample->A_I_6)/4;//
+            an_buffer_b[an_buffer_idx] = B_U_channel_index*ntohl(sample->B_U_6) / 4;//
+            an_buffer_b_cur[an_buffer_idx] = B_I_channel_index*ntohl(sample->B_I_6) / 4;//
+            an_buffer_c[an_buffer_idx] = C_U_channel_index*ntohl(sample->C_U_6) / 4;//
+            an_buffer_c_cur[an_buffer_idx] = C_I_channel_index*ntohl(sample->C_I_6) / 4;//
+            an_buffer_idx++;
+
+            an_buffer[an_buffer_idx] = A_U_channel_index*ntohl(sample->A_U_7)/4;//
+            an_buffer_cur[an_buffer_idx] = A_I_channel_index*ntohl(sample->A_I_7)/4;//
+            an_buffer_b[an_buffer_idx] = B_U_channel_index*ntohl(sample->B_U_7) / 4;//
+            an_buffer_b_cur[an_buffer_idx] = B_I_channel_index*ntohl(sample->B_I_7) / 4;//
+            an_buffer_c[an_buffer_idx] = C_U_channel_index*ntohl(sample->C_U_7) / 4;//
+            an_buffer_c_cur[an_buffer_idx] = C_I_channel_index*ntohl(sample->C_I_7) / 4;//
+            an_buffer_idx++;
+
+            an_buffer[an_buffer_idx] = A_U_channel_index*ntohl(sample->A_U_8)/4;//
+            an_buffer_cur[an_buffer_idx] = A_I_channel_index*ntohl(sample->A_I_8)/4;//
+            an_buffer_b[an_buffer_idx] = B_U_channel_index*ntohl(sample->B_U_8) / 4;//
+            an_buffer_b_cur[an_buffer_idx] = B_I_channel_index*ntohl(sample->B_I_8) / 4;//
+            an_buffer_c[an_buffer_idx] = C_U_channel_index*ntohl(sample->C_U_8) / 4;//
+            an_buffer_c_cur[an_buffer_idx] = C_I_channel_index*ntohl(sample->C_I_8) / 4;//
+            an_buffer_idx++;
+
+            an_buffer[an_buffer_idx] = A_U_channel_index*ntohl(sample->A_U_9)/4;//
+            an_buffer_cur[an_buffer_idx] = A_I_channel_index*ntohl(sample->A_I_9)/4;//
+            an_buffer_b[an_buffer_idx] = B_U_channel_index*ntohl(sample->B_U_9) / 4;//
+            an_buffer_b_cur[an_buffer_idx] = B_I_channel_index*ntohl(sample->B_I_9) / 4;//
+            an_buffer_c[an_buffer_idx] = C_U_channel_index*ntohl(sample->C_U_9) / 4;//
+            an_buffer_c_cur[an_buffer_idx] = C_I_channel_index*ntohl(sample->C_I_9) / 4;//
+            an_buffer_idx++;
+
+            an_buffer[an_buffer_idx] = A_U_channel_index*ntohl(sample->A_U_10)/4;//
+            an_buffer_cur[an_buffer_idx] = A_I_channel_index*ntohl(sample->A_I_10)/4;
+            an_buffer_b[an_buffer_idx] = B_U_channel_index*ntohl(sample->B_U_10) / 4;
+            an_buffer_b_cur[an_buffer_idx] = B_I_channel_index*ntohl(sample->B_I_10) / 4;
+            an_buffer_c[an_buffer_idx] = C_U_channel_index*ntohl(sample->C_U_10) / 4;
+            an_buffer_c_cur[an_buffer_idx] = C_I_channel_index*ntohl(sample->C_I_10) / 4;
+            an_buffer_idx++;
+
+            an_buffer[an_buffer_idx] = A_U_channel_index*ntohl(sample->A_U_11)/4;
+            an_buffer_cur[an_buffer_idx] = A_I_channel_index*ntohl(sample->A_I_11)/4;
+            an_buffer_b[an_buffer_idx] = B_U_channel_index*ntohl(sample->B_U_11) / 4;
+            an_buffer_b_cur[an_buffer_idx] = B_I_channel_index*ntohl(sample->B_I_11) / 4;
+            an_buffer_c[an_buffer_idx] = C_U_channel_index*ntohl(sample->C_U_11) / 4;
+            an_buffer_c_cur[an_buffer_idx] = C_I_channel_index*ntohl(sample->C_I_11) / 4;
+            an_buffer_idx++;
+            an_buffer[an_buffer_idx] = A_U_channel_index*ntohl(sample->A_U_12)/4;
+            an_buffer_cur[an_buffer_idx] = A_I_channel_index*ntohl(sample->A_I_12)/4;
+            an_buffer_b[an_buffer_idx] = B_U_channel_index*ntohl(sample->B_U_12) / 4;
+            an_buffer_b_cur[an_buffer_idx] = B_I_channel_index*ntohl(sample->B_I_12) / 4;
+            an_buffer_c[an_buffer_idx] = C_U_channel_index*ntohl(sample->C_U_12) / 4;
+            an_buffer_c_cur[an_buffer_idx] = C_I_channel_index*ntohl(sample->C_I_12) / 4;
+            an_buffer_idx++;
+
+            an_buffer[an_buffer_idx] = A_U_channel_index*ntohl(sample->A_U_13)/4;
+            an_buffer_cur[an_buffer_idx] = A_I_channel_index*ntohl(sample->A_I_13)/4;
+            an_buffer_b[an_buffer_idx] = B_U_channel_index*ntohl(sample->B_U_13) / 4;
+            an_buffer_b_cur[an_buffer_idx] = B_I_channel_index*ntohl(sample->B_I_13) / 4;
+            an_buffer_c[an_buffer_idx] = C_U_channel_index*ntohl(sample->C_U_13) / 4;
+             an_buffer_c_cur[an_buffer_idx] = C_I_channel_index*ntohl(sample->C_I_13) / 4;
+            an_buffer_idx++;
+
+            an_buffer[an_buffer_idx] = A_U_channel_index*ntohl(sample->A_U_14)/4;
+            an_buffer_cur[an_buffer_idx] = A_I_channel_index*ntohl(sample->A_I_14)/4;
+            an_buffer_b[an_buffer_idx] = B_U_channel_index*ntohl(sample->B_U_14) / 4;
+            an_buffer_b_cur[an_buffer_idx] = B_I_channel_index*ntohl(sample->B_I_14) / 4;
+            an_buffer_c[an_buffer_idx] = C_U_channel_index*ntohl(sample->C_U_14) / 4;
+            an_buffer_c_cur[an_buffer_idx] = C_I_channel_index*ntohl(sample->C_I_14) / 4;
+            an_buffer_idx++;
+
+            an_buffer[an_buffer_idx] = A_U_channel_index*ntohl(sample->A_U_15)/4;
+            an_buffer_cur[an_buffer_idx] = A_I_channel_index*ntohl(sample->A_I_15)/4;
+            an_buffer_b[an_buffer_idx] = B_U_channel_index*ntohl(sample->B_U_15) / 4;
+            an_buffer_b_cur[an_buffer_idx] = B_I_channel_index*ntohl(sample->B_I_15) / 4;
+            an_buffer_c[an_buffer_idx] = C_U_channel_index*ntohl(sample->C_U_15) / 4;
+            an_buffer_c_cur[an_buffer_idx] = C_I_channel_index*ntohl(sample->C_I_15) / 4;
+            an_buffer_idx++;
+
+            an_buffer[an_buffer_idx] = A_U_channel_index*ntohl(sample->A_U_16)/4;
+            an_buffer_cur[an_buffer_idx] = A_I_channel_index*ntohl(sample->A_I_16)/4;
+            an_buffer_b[an_buffer_idx] = B_U_channel_index*ntohl(sample->B_U_16) / 4;
+            an_buffer_b_cur[an_buffer_idx] = B_I_channel_index*ntohl(sample->B_I_16) / 4;
+            an_buffer_c[an_buffer_idx] = C_U_channel_index*ntohl(sample->C_U_16) / 4;
+            an_buffer_c_cur[an_buffer_idx] = C_I_channel_index*ntohl(sample->C_I_16) / 4;
+            an_buffer_idx++;
+
+            an_buffer[an_buffer_idx] = A_U_channel_index*ntohl(sample->A_U_17)/4;
+            an_buffer_cur[an_buffer_idx] = A_I_channel_index*ntohl(sample->A_I_17)/4;
+            an_buffer_b[an_buffer_idx] = B_U_channel_index*ntohl(sample->B_U_17) / 4;
+            an_buffer_b_cur[an_buffer_idx] = B_I_channel_index*ntohl(sample->B_I_17) / 4;
+            an_buffer_c[an_buffer_idx] = C_U_channel_index*ntohl(sample->C_U_17) / 4;
+            an_buffer_c_cur[an_buffer_idx] = C_I_channel_index*ntohl(sample->C_I_17) / 4;
+            an_buffer_idx++;
+
+            an_buffer[an_buffer_idx] = A_U_channel_index*ntohl(sample->A_U_18)/4;
+            an_buffer_cur[an_buffer_idx] = A_I_channel_index*ntohl(sample->A_I_18)/4;
+            an_buffer_b[an_buffer_idx] = B_U_channel_index*ntohl(sample->B_U_18) / 4;
+            an_buffer_b_cur[an_buffer_idx] = B_I_channel_index*ntohl(sample->B_I_18) / 4;
+            an_buffer_c[an_buffer_idx] = C_U_channel_index*ntohl(sample->C_U_18) / 4;
+            an_buffer_c_cur[an_buffer_idx] = C_I_channel_index*ntohl(sample->C_I_18) / 4;
+            an_buffer_idx++;
+            an_buffer[an_buffer_idx] = A_U_channel_index*ntohl(sample->A_U_19)/4;
+            an_buffer_cur[an_buffer_idx] = A_I_channel_index*ntohl(sample->A_I_19)/4;
+            an_buffer_b[an_buffer_idx] = B_U_channel_index*ntohl(sample->B_U_19) / 4;
+            an_buffer_b_cur[an_buffer_idx] = B_I_channel_index*ntohl(sample->B_I_19) / 4;
+            an_buffer_c[an_buffer_idx] = C_U_channel_index*ntohl(sample->C_U_19) / 4;
+            an_buffer_c_cur[an_buffer_idx] = C_I_channel_index*ntohl(sample->C_I_19)/ 4;
+            an_buffer_idx++;
+
+            an_buffer[an_buffer_idx] = A_U_channel_index*ntohl(sample->A_U_20)/4;
+            an_buffer_cur[an_buffer_idx] = A_I_channel_index*ntohl(sample->A_I_20)/4;
+            an_buffer_b[an_buffer_idx] = B_U_channel_index*ntohl(sample->B_U_20) / 4;
+            an_buffer_b_cur[an_buffer_idx] = B_I_channel_index*ntohl(sample->B_I_20) / 4;
+            an_buffer_c[an_buffer_idx] = C_U_channel_index*ntohl(sample->C_U_20) / 4;
+            an_buffer_c_cur[an_buffer_idx] = C_I_channel_index*ntohl(sample->C_I_20) / 4;
+            an_buffer_idx++;
+            //for(int i=0;i<20;i++)
+                //fprintf(fp, "%d %d\n",an_buffer_idx,an_buffer[an_buffer_idx-20+i]);
+             //if(output_flag==0)
             {
-                output1=an_buffer[an_buffer_idx-1];
+                output1=an_buffer[an_buffer_idx-20];
                 output2=A_temp;
                 output_flag=1;
             }
@@ -104,13 +260,15 @@ void ethernet_protocol_packet_callback(u_char * arg, const struct pcap_pkthdr * 
             sem_post(&B_halfcalc_semaphore);
             sem_post(&C_halfcalc_semaphore);
         }
-        if (an_buffer_idx % 8 == 0) //
-        {
-            sem_post(&data_send_sem);
-        }
+        //if (an_buffer_idx % 8 == 0) //
+        //{
+            //sem_post(&data_send_sem);
+        //}
         if (an_buffer_idx % Plus_8000 == 0)//
              {
                index_8800_A = an_buffer_idx / Plus_8000;
+               index_8800_B = an_buffer_idx / Plus_8000;
+               index_8800_C = an_buffer_idx / Plus_8000;
                an_buffer_8800flag_A = 1;
                an_buffer_8800flag_B = 1;
                an_buffer_8800flag_C = 1;
@@ -120,14 +278,170 @@ void ethernet_protocol_packet_callback(u_char * arg, const struct pcap_pkthdr * 
    else
         {
             an_buffer_idx = 0;
-            an_buffer[an_buffer_idx] = ntohl(sample->A_U)/4;//
-            an_buffer_cur[an_buffer_idx] = ntohl(sample->A_I)/4;//
-            an_buffer[an_buffer_idx]=an_buffer[an_buffer_idx]*a_channel_index;
-            an_buffer_b[an_buffer_idx] = ntohl(sample->B_U) / 4;//
-            an_buffer_b_cur[an_buffer_idx] = ntohl(sample->B_I) / 4;//
-            an_buffer_c[an_buffer_idx] = ntohl(sample->C_U) / 4;//
-            an_buffer_c_cur[an_buffer_idx] = ntohl(sample->C_I) / 4;//
+
+            an_buffer[an_buffer_idx] = A_U_channel_index*ntohl(sample->A_U_1)/4;//
+            an_buffer_cur[an_buffer_idx] = A_I_channel_index*ntohl(sample->A_I_1)/4;
+            an_buffer_b[an_buffer_idx] = B_U_channel_index*ntohl(sample->B_U_1) / 4;
+            an_buffer_b_cur[an_buffer_idx] = B_I_channel_index*ntohl(sample->B_I_1) / 4;
+            an_buffer_c[an_buffer_idx] = C_U_channel_index*ntohl(sample->C_U_1) / 4;
+            an_buffer_c_cur[an_buffer_idx] = C_I_channel_index*ntohl(sample->C_I_1) / 4;
             an_buffer_idx++;
+
+            an_buffer[an_buffer_idx] = A_U_channel_index*ntohl(sample->A_U_2)/4;
+            an_buffer_cur[an_buffer_idx] = A_I_channel_index*ntohl(sample->A_I_2)/4;
+            an_buffer_b[an_buffer_idx] = B_U_channel_index*ntohl(sample->B_U_2) / 4;
+            an_buffer_b_cur[an_buffer_idx] = B_I_channel_index*ntohl(sample->B_I_2) / 4;
+            an_buffer_c[an_buffer_idx] = C_U_channel_index*ntohl(sample->C_U_2) / 4;
+            an_buffer_c_cur[an_buffer_idx] = C_I_channel_index*ntohl(sample->C_I_2) / 4;
+            an_buffer_idx++;
+
+            an_buffer[an_buffer_idx] = A_U_channel_index*ntohl(sample->A_U_3)/4;
+            an_buffer_cur[an_buffer_idx] = A_I_channel_index*ntohl(sample->A_I_3)/4;
+            an_buffer_b[an_buffer_idx] = B_U_channel_index*ntohl(sample->B_U_3) / 4;
+            an_buffer_b_cur[an_buffer_idx] = B_I_channel_index*ntohl(sample->B_I_3) / 4;
+            an_buffer_c[an_buffer_idx] = C_U_channel_index*ntohl(sample->C_U_3) / 4;
+            an_buffer_c_cur[an_buffer_idx] = C_I_channel_index*ntohl(sample->C_I_3) / 4;
+            an_buffer_idx++;
+
+            an_buffer[an_buffer_idx] = A_U_channel_index*ntohl(sample->A_U_4)/4;
+            an_buffer_cur[an_buffer_idx] = A_I_channel_index*ntohl(sample->A_I_4)/4;
+            an_buffer_b[an_buffer_idx] = B_U_channel_index*ntohl(sample->B_U_4) / 4;
+            an_buffer_b_cur[an_buffer_idx] = B_I_channel_index*ntohl(sample->B_I_4) / 4;
+            an_buffer_c[an_buffer_idx] = C_U_channel_index*ntohl(sample->C_U_4) / 4;
+            an_buffer_c_cur[an_buffer_idx] = C_I_channel_index*ntohl(sample->C_I_4) / 4;
+            an_buffer_idx++;
+
+            an_buffer[an_buffer_idx] = A_U_channel_index*ntohl(sample->A_U_5)/4;
+            an_buffer_cur[an_buffer_idx] = A_I_channel_index*ntohl(sample->A_I_5)/4;
+            an_buffer_b[an_buffer_idx] = B_U_channel_index*ntohl(sample->B_U_5) / 4;
+            an_buffer_b_cur[an_buffer_idx] = B_I_channel_index*ntohl(sample->B_I_5) / 4;
+            an_buffer_c[an_buffer_idx] = C_U_channel_index*ntohl(sample->C_U_5) / 4;
+            an_buffer_c_cur[an_buffer_idx] = C_I_channel_index*ntohl(sample->C_I_5) / 4;
+            an_buffer_idx++;
+
+            an_buffer[an_buffer_idx] = A_U_channel_index*ntohl(sample->A_U_6)/4;
+            an_buffer_cur[an_buffer_idx] = A_I_channel_index*ntohl(sample->A_I_6)/4;
+            an_buffer_b[an_buffer_idx] = B_U_channel_index*ntohl(sample->B_U_6) / 4;
+            an_buffer_b_cur[an_buffer_idx] = B_I_channel_index*ntohl(sample->B_I_6) / 4;
+            an_buffer_c[an_buffer_idx] = C_U_channel_index*ntohl(sample->C_U_6) / 4;
+            an_buffer_c_cur[an_buffer_idx] = C_I_channel_index*ntohl(sample->C_I_6) / 4;
+            an_buffer_idx++;
+
+            an_buffer[an_buffer_idx] = A_U_channel_index*ntohl(sample->A_U_7)/4;
+            an_buffer_cur[an_buffer_idx] = A_I_channel_index*ntohl(sample->A_I_7)/4;
+            an_buffer_b[an_buffer_idx] = B_U_channel_index*ntohl(sample->B_U_7) / 4;
+            an_buffer_b_cur[an_buffer_idx] = B_I_channel_index*ntohl(sample->B_I_7) / 4;
+            an_buffer_c[an_buffer_idx] = C_U_channel_index*ntohl(sample->C_U_7) / 4;
+            an_buffer_c_cur[an_buffer_idx] = C_I_channel_index*ntohl(sample->C_I_7) / 4;
+            an_buffer_idx++;
+
+            an_buffer[an_buffer_idx] = A_U_channel_index*ntohl(sample->A_U_8)/4;
+            an_buffer_cur[an_buffer_idx] = A_I_channel_index*ntohl(sample->A_I_8)/4;
+            an_buffer_b[an_buffer_idx] = B_U_channel_index*ntohl(sample->B_U_8) / 4;
+            an_buffer_b_cur[an_buffer_idx] = B_I_channel_index*ntohl(sample->B_I_8) / 4;
+            an_buffer_c[an_buffer_idx] = C_U_channel_index*ntohl(sample->C_U_8) / 4;
+            an_buffer_c_cur[an_buffer_idx] = C_I_channel_index*ntohl(sample->C_I_8) / 4;
+            an_buffer_idx++;
+
+            an_buffer[an_buffer_idx] = A_U_channel_index*ntohl(sample->A_U_9)/4;
+            an_buffer_cur[an_buffer_idx] = A_I_channel_index*ntohl(sample->A_I_9)/4;
+            an_buffer_b[an_buffer_idx] = B_U_channel_index*ntohl(sample->B_U_9) / 4;
+            an_buffer_b_cur[an_buffer_idx] = B_I_channel_index*ntohl(sample->B_I_9) / 4;
+            an_buffer_c[an_buffer_idx] = C_U_channel_index*ntohl(sample->C_U_9) / 4;
+            an_buffer_c_cur[an_buffer_idx] = C_I_channel_index*ntohl(sample->C_I_9 )/ 4;
+            an_buffer_idx++;
+
+            an_buffer[an_buffer_idx] = A_U_channel_index*ntohl(sample->A_U_10)/4;
+            an_buffer_cur[an_buffer_idx] = A_I_channel_index*ntohl(sample->A_I_10)/4;
+            an_buffer[an_buffer_idx]=an_buffer[an_buffer_idx]* A_U_channel_index;
+            an_buffer_b[an_buffer_idx] = B_U_channel_index*ntohl(sample->B_U_10) / 4;
+            an_buffer_b_cur[an_buffer_idx] = B_I_channel_index*ntohl(sample->B_I_10) / 4;
+            an_buffer_c[an_buffer_idx] = C_U_channel_index*ntohl(sample->C_U_10) / 4;
+            an_buffer_c_cur[an_buffer_idx] = C_I_channel_index*ntohl(sample->C_I_10) / 4;
+            an_buffer_idx++;
+
+            an_buffer[an_buffer_idx] = A_U_channel_index*ntohl(sample->A_U_11)/4;
+            an_buffer_cur[an_buffer_idx] = A_I_channel_index*ntohl(sample->A_I_11)/4;
+            an_buffer_b[an_buffer_idx] = B_U_channel_index*ntohl(sample->B_U_11) / 4;
+            an_buffer_b_cur[an_buffer_idx] = B_I_channel_index*ntohl(sample->B_I_11) / 4;
+            an_buffer_c[an_buffer_idx] = C_U_channel_index*ntohl(sample->C_U_11) / 4;
+            an_buffer_c_cur[an_buffer_idx] = C_I_channel_index*ntohl(sample->C_I_11) / 4;
+            an_buffer_idx++;
+
+            an_buffer[an_buffer_idx] = A_U_channel_index*ntohl(sample->A_U_12)/4;
+            an_buffer_cur[an_buffer_idx] = A_I_channel_index*ntohl(sample->A_I_12)/4;
+            an_buffer_b[an_buffer_idx] = B_U_channel_index*ntohl(sample->B_U_12) / 4;
+            an_buffer_b_cur[an_buffer_idx] = B_I_channel_index*ntohl(sample->B_I_12) / 4;
+            an_buffer_c[an_buffer_idx] = C_U_channel_index*ntohl(sample->C_U_12) / 4;
+            an_buffer_c_cur[an_buffer_idx] = C_I_channel_index*ntohl(sample->C_I_12) / 4;
+            an_buffer_idx++;
+
+            an_buffer[an_buffer_idx] = A_U_channel_index*ntohl(sample->A_U_13)/4;
+            an_buffer_cur[an_buffer_idx] = A_I_channel_index*ntohl(sample->A_I_13)/4;
+            an_buffer_b[an_buffer_idx] = B_U_channel_index*ntohl(sample->B_U_13) / 4;
+            an_buffer_b_cur[an_buffer_idx] = B_I_channel_index*ntohl(sample->B_I_13) / 4;
+            an_buffer_c[an_buffer_idx] = C_U_channel_index*ntohl(sample->C_U_13) / 4;
+            an_buffer_c_cur[an_buffer_idx] = C_I_channel_index*ntohl(sample->C_I_13) / 4;
+            an_buffer_idx++;
+
+            an_buffer[an_buffer_idx] = A_U_channel_index*ntohl(sample->A_U_14)/4;
+            an_buffer_cur[an_buffer_idx] = A_I_channel_index*ntohl(sample->A_I_14)/4;
+            an_buffer_b[an_buffer_idx] = B_U_channel_index*ntohl(sample->B_U_14) / 4;
+            an_buffer_b_cur[an_buffer_idx] = B_I_channel_index*ntohl(sample->B_I_14) / 4;
+            an_buffer_c[an_buffer_idx] = C_U_channel_index*ntohl(sample->C_U_14) / 4;
+            an_buffer_c_cur[an_buffer_idx] = C_I_channel_index*ntohl(sample->C_I_14) / 4;
+            an_buffer_idx++;
+
+            an_buffer[an_buffer_idx] = A_U_channel_index*ntohl(sample->A_U_15)/4;
+            an_buffer_cur[an_buffer_idx] = A_I_channel_index*ntohl(sample->A_I_15)/4;
+            an_buffer_b[an_buffer_idx] = B_U_channel_index*ntohl(sample->B_U_15) / 4;
+            an_buffer_b_cur[an_buffer_idx] = B_I_channel_index*ntohl(sample->B_I_15) / 4;
+            an_buffer_c[an_buffer_idx] = C_U_channel_index*ntohl(sample->C_U_15) / 4;
+            an_buffer_c_cur[an_buffer_idx] = C_I_channel_index*ntohl(sample->C_I_15) / 4;
+            an_buffer_idx++;
+
+            an_buffer[an_buffer_idx] = A_U_channel_index*ntohl(sample->A_U_16)/4;
+            an_buffer_cur[an_buffer_idx] = A_I_channel_index*ntohl(sample->A_I_16)/4;
+            an_buffer_b[an_buffer_idx] = B_U_channel_index*ntohl(sample->B_U_16) / 4;
+            an_buffer_b_cur[an_buffer_idx] = B_I_channel_index*ntohl(sample->B_I_16) / 4;
+            an_buffer_c[an_buffer_idx] = C_U_channel_index*ntohl(sample->C_U_16) / 4;
+            an_buffer_c_cur[an_buffer_idx] = C_I_channel_index*ntohl(sample->C_I_16) / 4;
+            an_buffer_idx++;
+
+            an_buffer[an_buffer_idx] = A_U_channel_index*ntohl(sample->A_U_17)/4;
+            an_buffer_cur[an_buffer_idx] = A_I_channel_index*ntohl(sample->A_I_17)/4;
+            an_buffer_b[an_buffer_idx] = B_U_channel_index*ntohl(sample->B_U_17) / 4;
+            an_buffer_b_cur[an_buffer_idx] = B_I_channel_index*ntohl(sample->B_I_17) / 4;
+            an_buffer_c[an_buffer_idx] = C_U_channel_index*ntohl(sample->C_U_17) / 4;
+            an_buffer_c_cur[an_buffer_idx] = C_I_channel_index*ntohl(sample->C_I_17) / 4;
+            an_buffer_idx++;
+
+            an_buffer[an_buffer_idx] = A_U_channel_index*ntohl(sample->A_U_18)/4;
+            an_buffer_cur[an_buffer_idx] = A_I_channel_index*ntohl(sample->A_I_18)/4;
+            an_buffer_b[an_buffer_idx] = B_U_channel_index*ntohl(sample->B_U_18) / 4;
+            an_buffer_b_cur[an_buffer_idx] = B_I_channel_index*ntohl(sample->B_I_18) / 4;
+            an_buffer_c[an_buffer_idx] = C_U_channel_index*ntohl(sample->C_U_18) / 4;
+            an_buffer_c_cur[an_buffer_idx] = C_I_channel_index*ntohl(sample->C_I_18) / 4;
+            an_buffer_idx++;
+
+            an_buffer[an_buffer_idx] = A_U_channel_index*ntohl(sample->A_U_19)/4;
+            an_buffer_cur[an_buffer_idx] = A_I_channel_index*ntohl(sample->A_I_19)/4;
+            an_buffer_b[an_buffer_idx] = B_U_channel_index*ntohl(sample->B_U_19) / 4;
+            an_buffer_b_cur[an_buffer_idx] = B_I_channel_index*ntohl(sample->B_I_19) / 4;
+            an_buffer_c[an_buffer_idx] = C_U_channel_index*C_U_channel_index*ntohl(sample->C_U_19) / 4;
+            an_buffer_c_cur[an_buffer_idx] = C_I_channel_index*ntohl(sample->C_I_19 )/ 4;
+            an_buffer_idx++;
+
+            an_buffer[an_buffer_idx] = A_U_channel_index*ntohl(sample->A_U_20)/4;
+            an_buffer_cur[an_buffer_idx] = A_I_channel_index*ntohl(sample->A_I_20)/4;
+            an_buffer_b[an_buffer_idx] = B_U_channel_index*ntohl(sample->B_U_20) / 4;
+            an_buffer_b_cur[an_buffer_idx] = B_I_channel_index*ntohl(sample->B_I_20) / 4;
+            an_buffer_c[an_buffer_idx] = C_U_channel_index*ntohl(sample->C_U_20) / 4;
+            an_buffer_c_cur[an_buffer_idx] = C_I_channel_index*ntohl(sample->C_I_20) / 4;
+            an_buffer_idx++;
+
+            //for(int i=0;i<20;i++)
+                //fprintf(fp, "%d %d\n",an_buffer_idx,an_buffer[i]);
         }
      }
     packet_number = 1;
@@ -425,7 +739,8 @@ void *FFT_ThreadFunc(void *arg)
                }
             }
 
-            if (an_buffer_8800flag_B == 1)
+            /*
+             if (an_buffer_8800flag_B == 1)
                         {
                             B_sum_vol = 0; B_sum_cur = 0; B_active_power_temp = 0; B_reactive_power_temp = 0; B_THDU_temp = 0; B_THDI_temp = 0;
                             for (int h = 0; h < Plus_8000; h++)
@@ -453,7 +768,7 @@ void *FFT_ThreadFunc(void *arg)
                             fftw_ampout_b[11] = sqrt(out_fre_b[11][0] * out_fre_b[11][0] + out_fre_b[11][1] * out_fre_b[11][1]) / (FFT_8000 / 2);
                             //--------------г����������ֵ-------------------
                             //�����߲�ֵ   Ƶ�׷ֱ���5Hz
-                            /************************************************************Ƶ��**************************************************************************/
+
                             alpha_b[0] = (fftw_ampout_b[11] - fftw_ampout_b[9]) / fftw_ampout_b[10];
                             //Ƶ��������ʽ
                             deta_b[0] = 0.6666 * alpha_b[0]
@@ -483,8 +798,8 @@ void *FFT_ThreadFunc(void *arg)
                             fftw_destroy_plan(p_bi_fuzhi);
                            pthread_mutex_unlock(&fft_mutex);
 
-                            /*fftw_ampout_b_fuzhi[0] = sqrt(out_b_fuzhi[0][0] * out_b_fuzhi[0][0] + out_b_fuzhi[0][1] * out_b_fuzhi[0][1]) / (B_FFT_Number);
-                            fftw_ampout_bi_fuzhi[0] = sqrt(out_bi_fuzhi[0][0] * out_bi_fuzhi[0][0] + out_bi_fuzhi[0][1] * out_bi_fuzhi[0][1]) / (B_FFT_Number);*/
+                            //fftw_ampout_b_fuzhi[0] = sqrt(out_b_fuzhi[0][0] * out_b_fuzhi[0][0] + out_b_fuzhi[0][1] * out_b_fuzhi[0][1]) / (B_FFT_Number);
+                            //fftw_ampout_bi_fuzhi[0] = sqrt(out_bi_fuzhi[0][0] * out_bi_fuzhi[0][0] + out_bi_fuzhi[0][1] * out_bi_fuzhi[0][1]) / (B_FFT_Number);
                             fftw_ampout_b_fuzhi[0] = out_b_fuzhi[0][0] / B_FFT_Number;
                             fftw_ampout_bi_fuzhi[0] = out_bi_fuzhi[0][0] / B_FFT_Number;
 
@@ -502,7 +817,7 @@ void *FFT_ThreadFunc(void *arg)
                                 //fuzhi_b_cur[j] = fftw_ampout_bi_fuzhi[index] / factor_factor;
                                 fuzhi_b_cur_temp[B_HarmonicIndex][j] = fftw_ampout_bi_fuzhi[index_B] / factor_factor;
                                 fftw_phase_b_cur[j] = atan2(out_bi_fuzhi[index_B][1], out_bi_fuzhi[index_B][0]) + PI / 2;
-                                /*************************************************A�๦��������*****************************************************************************/
+
                                 if (fabs(fftw_phase_b[j] - fftw_phase_b_cur[j]) > PI)
                                 {
                                     fftw_phase_differ_b[j] = 2 * PI - fabs(fftw_phase_b[j] - fftw_phase_b_cur[j]);
@@ -562,6 +877,7 @@ void *FFT_ThreadFunc(void *arg)
                             }
                         }
 
+
             if (an_buffer_8800flag_C == 1)
                         {
                             C_sum_vol = 0; C_sum_cur = 0; C_reactive_power_temp = 0; C_active_power_temp = 0; C_THDU_temp = 0; C_THDI_temp = 0;
@@ -589,7 +905,7 @@ void *FFT_ThreadFunc(void *arg)
                             fftw_ampout_c[11] = sqrt(out_c_fre[11][0] * out_c_fre[11][0] + out_c_fre[11][1] * out_c_fre[11][1]) / (FFT_8000 / 2);
                             //--------------г����������ֵ-------------------
                             //�����߲�ֵ   Ƶ�׷ֱ���5Hz
-                            /************************************************************Ƶ��**************************************************************************/
+
                             alpha_c[0] = (fftw_ampout_c[11] - fftw_ampout_c[9]) / fftw_ampout_c[10];
                             //Ƶ��������ʽ
                             deta_c[0] = 0.6666 * alpha_c[0]
@@ -620,8 +936,8 @@ void *FFT_ThreadFunc(void *arg)
                                 fftw_destroy_plan(p_ci_fuzhi);
                                 pthread_mutex_unlock(&fft_mutex);
 
-                                /*fftw_ampout_c_fuzhi[0] = sqrt(out_c_fuzhi[0][0] * out_c_fuzhi[0][0] + out_c_fuzhi[0][1] * out_c_fuzhi[0][1]) / (C_FFT_Number);
-                                fftw_ampout_ci_fuzhi[0] = sqrt(out_ci_fuzhi[0][0] * out_ci_fuzhi[0][0] + out_ci_fuzhi[0][1] * out_ci_fuzhi[0][1]) / (C_FFT_Number);*/
+                                //fftw_ampout_c_fuzhi[0] = sqrt(out_c_fuzhi[0][0] * out_c_fuzhi[0][0] + out_c_fuzhi[0][1] * out_c_fuzhi[0][1]) / (C_FFT_Number);
+                                //fftw_ampout_ci_fuzhi[0] = sqrt(out_ci_fuzhi[0][0] * out_ci_fuzhi[0][0] + out_ci_fuzhi[0][1] * out_ci_fuzhi[0][1]) / (C_FFT_Number);
                                 fftw_ampout_c_fuzhi[0] = out_c_fuzhi[0][0] / C_FFT_Number;
                                 fftw_ampout_ci_fuzhi[0] = out_ci_fuzhi[0][0] / C_FFT_Number;
                                 for (j = 1; j < 420; j++)
@@ -695,6 +1011,7 @@ void *FFT_ThreadFunc(void *arg)
                                 an_buffer_8800flag_C = 0;
                             }
                         }
+                     */
             sem_post(&FFT_semaphore);
             sem_wait(&FFT_semaphore);
         }
