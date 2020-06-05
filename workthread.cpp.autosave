@@ -1649,7 +1649,7 @@ void *C_HalfThreadFunc(void *arg)
                 if (C_voltageswellstartflag)  //����
                 {
                     C_voltageswellcalculation();
-                }
+                } 
                 if (C_voltageinterruptstartflag) //��ѹ�ж�
                 {
                     C_voltageinterruptioncalculation();
